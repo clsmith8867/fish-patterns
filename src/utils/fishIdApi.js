@@ -1,4 +1,5 @@
-const FISH_ID_SERVER = "http://192.168.1.203:3001";
+const FISH_ID_SERVER =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
 
 export async function identifyFish(photoDataUrl, examples = []) {
   try {
