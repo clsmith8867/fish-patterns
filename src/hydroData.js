@@ -94,13 +94,13 @@ function shouldTryGeorgiaPower(managedBy = "", waterbodyName = "") {
 
 async function getGeorgiaPowerHydro({ waterbodyName }) {
     const url =
-  `http://192.168.1.203:3001/api/hydro/georgia-power?lake=` +
+  `https://bite-logic-api.onrender.com/api/hydro/georgia-power?lake=` +
   encodeURIComponent(waterbodyName || "");
 
   const data = await fetchJson(url);
 
   const operationsUrl =
-  `http://192.168.1.203:3001/api/hydro/georgia-power-operations?lake=` +
+  `https://bite-logic-api.onrender.com/api/hydro/georgia-power-operations?lake=` +
   encodeURIComponent(waterbodyName || "");
 
 let operations = null;
@@ -177,7 +177,7 @@ async function getUsaceHydro({ waterbodyName }) {
   const lakeId = toUsaceLakeId(waterbodyName);
 
   const url =
-    `http://192.168.1.203:3001/api/hydro/usace?lake=` +
+    `https://bite-logic-api.onrender.com/api/hydro/usace?lake=` +
     encodeURIComponent(lakeId);
 
   const data = await fetchJson(url);
@@ -209,7 +209,7 @@ async function getUsaceHydro({ waterbodyName }) {
 
 async function getLakeLevelsInfo({ waterbodyName }) {
   const url =
-    `http://192.168.1.203:3001/api/hydro/lakelevels?lake=` +
+    `https://bite-logic-api.onrender.com/api/hydro/lakelevels?lake=` +
     encodeURIComponent(waterbodyName || "");
 
   const data = await fetchJson(url);
