@@ -895,58 +895,21 @@ function SwipeCatchCard({
   const [startX, setStartX] = useState(null);
   const [offsetX, setOffsetX] = useState(0);
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState({
-    species: fish.species || "",
-    lake: fish.lake || "",
-    size: fish.size || "",
-    bait: fish.bait || "",
-    notes: fish.notes || "",
-    date: fish.date || new Date().toISOString(),
-  });
-
   function handleTouchStart(e) {
     setStartX(e.touches[0].clientX);
   }
 
   function handleTouchMove(e) {
     if (startX === null) return;
-
     const diff = e.touches[0].clientX - startX;
-
-    if (diff < 0) {
-      setOffsetX(Math.max(diff, -120));
-    }
+    if (diff < 0) setOffsetX(Math.max(diff, -120));
   }
 
   function handleTouchEnd() {
-    if (offsetX < -70) {
-      setOffsetX(-120);
-    } else {
-      setOffsetX(0);
-    }
-
+    setOffsetX(offsetX < -70 ? -120 : 0);
     setStartX(null);
   }
 
-  function updateEdit(field, value) {
-    setEditForm((current) => ({ ...current, [field]: value }));
-  }
-
-  function saveEdit() {
-    onUpdateCatch(fish.id, {
-      species: editForm.species,
-      lake: editForm.lake,
-      size: editForm.size,
-      bait: editForm.bait,
-      notes: editForm.notes,
-      date: editForm.date,
-      wasEdited: true,
-      editedAt: new Date().toISOString(),
-    });
-
-    setIsEditing(false);
-  }
   return (
     <div className="swipeWrap">
       <button className="deleteReveal" onClick={() => onDeleteCatch(fish.id)}>
@@ -965,292 +928,263 @@ function SwipeCatchCard({
         </div>
 
         <div className="logDetails">
-          <p className="sectionLabel green">{formatCatchDate(fish.date)}</p>
+          <div className="logSection">
+            <p className="sectionLabel green">{formatCatchDate(fish.date)}</p>
+            <h2>{fish.species || "Unidentified Fish"}</h2>
 
-          <h2>{fish.species || "Unidentified Fish"}</h2>
-          <p className="muted">Correct species if needed:</p>
-          <select
-            value={fish.species}
-            onChange={(e) => {
-              const correctedSpecies = e.target.value;
+            <p className="muted">Correct species if needed:</p>
+            <select
+              value={fish.species}
+              onChange={(e) => {
+                const correctedSpecies = e.target.value;
+                saveCorrection(fish.photoKey, correctedSpecies);
+                saveTrainingExample(fish, correctedSpecies);
 
-              saveCorrection(fish.photoKey, correctedSpecies);
+                onUpdateCatch(fish.id, {
+                  species: correctedSpecies,
+                  confirmedSpecies: correctedSpecies,
+                  aiSpecies: fish.aiSpecies || fish.species,
+                  wasCorrected: true,
+                  confirmedAt: new Date().toISOString(),
+                });
+              }}
+            >
+              <option value={fish.species}>
+                {fish.species || "Unidentified Fish"}
+              </option>
+              <option value="Largemouth Bass">Largemouth Bass</option>
+              <option value="Spotted Bass">Spotted Bass</option>
+              <option value="White Bass">White Bass</option>
+              <option value="Striped Bass">Striped Bass</option>
+              <option value="Hybrid Striped Bass">Hybrid Striped Bass</option>
+              <option value="Black Crappie">Black Crappie</option>
+              <option value="White Crappie">White Crappie</option>
+              <option value="Bluegill / Bream">Bluegill / Bream</option>
+              <option value="Redear Sunfish / Shellcracker">
+                Redear Sunfish / Shellcracker
+              </option>
+              <option value="Channel Catfish">Channel Catfish</option>
+              <option value="Flathead Catfish">Flathead Catfish</option>
+            </select>
 
-              saveTrainingExample(fish, correctedSpecies);
+            <button
+              className="editCatchButton"
+              onClick={() => {
+                setEditingCatchId(fish.id);
+                setPage("editCatch");
+              }}
+            >
+              Edit Catch
+            </button>
+          </div>
 
-              onUpdateCatch(fish.id, {
-                species: correctedSpecies,
-                confirmedSpecies: correctedSpecies,
-                aiSpecies: fish.aiSpecies || fish.species,
-                wasCorrected: true,
-                confirmedAt: new Date().toISOString(),
-              });
-            }}
-          >
-            <option value={fish.species}>
-              {fish.species || "Unidentified Fish"}
-            </option>
-
-            <option value="Largemouth Bass">Largemouth Bass</option>
-            <option value="Spotted Bass">Spotted Bass</option>
-            <option value="White Bass">White Bass</option>
-            <option value="Striped Bass">Striped Bass</option>
-            <option value="Hybrid Striped Bass">Hybrid Striped Bass</option>
-            <option value="Black Crappie">Black Crappie</option>
-            <option value="White Crappie">White Crappie</option>
-            <option value="Bluegill / Bream">Bluegill / Bream</option>
-            <option value="Redear Sunfish / Shellcracker">
-              Redear Sunfish / Shellcracker
-            </option>
-            <option value="Channel Catfish">Channel Catfish</option>
-            <option value="Flathead Catfish">Flathead Catfish</option>
-          </select>
-          <button
-            className="editCatchButton"
-            onClick={() => {
-              setEditingCatchId(fish.id);
-              setPage("editCatch");
-            }}
-          >
-            Edit Catch
-          </button>
-
-          <p>
-            <strong>{fish.size}</strong> • {fish.lake}
-          </p>
-
-          <p>
-            <strong>Bait:</strong> {fish.bait}
-          </p>
-
-          {fish.patternTag && (
-            <p>
-              <strong>Fish Location:</strong> {fish.patternTag}
-            </p>
-          )}
-
-          <div className="weatherMini">
-            {hasValue(fish.weather?.temp) && (
+          <div className="logSection">
+            <div className="logGrid">
               <div>
-                <strong>Temp:</strong> {fish.weather.temp}°F
+                <strong>Size:</strong> {fish.size}
               </div>
-            )}
-
-            {hasValue(fish.weather?.feelsLike) && (
               <div>
-                <strong>Feels Like:</strong> {fish.weather.feelsLike}°F
+                <strong>Lake:</strong> {fish.lake}
               </div>
-            )}
-
-            {hasValue(fish.weather?.humidity) && (
               <div>
-                <strong>Humidity:</strong> {fish.weather.humidity}%
+                <strong>Bait:</strong> {fish.bait}
               </div>
-            )}
+              {fish.patternTag && (
+                <div>
+                  <strong>Fish Location:</strong> {fish.patternTag}
+                </div>
+              )}
+            </div>
+          </div>
 
-            {hasValue(fish.weather?.wind) && (
-              <div>
-                <strong>Wind:</strong> {fish.weather.wind} mph
-              </div>
-            )}
-
-            {hasValue(fish.weather?.windCardinal) && (
-              <div>
-                <strong>Wind Dir:</strong> {fish.weather.windCardinal}
-              </div>
-            )}
-
-            {hasValue(fish.weather?.pressure) && (
-              <div>
-                <strong>Pressure:</strong> {fish.weather.pressure} hPa
-              </div>
-            )}
-
-            {hasValue(fish.weather?.rain) && (
-              <div>
-                <strong>Rain:</strong> {fish.weather.rain} in
-              </div>
-            )}
-
-            {hasValue(fish.weather?.cloud) && (
-              <div>
-                <strong>Clouds:</strong> {fish.weather.cloud}%
-              </div>
-            )}
+          <div className="logSection">
+            <p className="sectionLabel">Weather</p>
+            <div className="weatherMini">
+              {hasValue(fish.weather?.temp) && (
+                <div>
+                  <strong>Temp:</strong> {fish.weather.temp}°F
+                </div>
+              )}
+              {hasValue(fish.weather?.feelsLike) && (
+                <div>
+                  <strong>Feels Like:</strong> {fish.weather.feelsLike}°F
+                </div>
+              )}
+              {hasValue(fish.weather?.humidity) && (
+                <div>
+                  <strong>Humidity:</strong> {fish.weather.humidity}%
+                </div>
+              )}
+              {hasValue(fish.weather?.wind) && (
+                <div>
+                  <strong>Wind:</strong> {fish.weather.wind} mph
+                </div>
+              )}
+              {hasValue(fish.weather?.windCardinal) && (
+                <div>
+                  <strong>Wind Dir:</strong> {fish.weather.windCardinal}
+                </div>
+              )}
+              {hasValue(fish.weather?.pressure) && (
+                <div>
+                  <strong>Pressure:</strong> {fish.weather.pressure} hPa
+                </div>
+              )}
+              {hasValue(fish.weather?.rain) && (
+                <div>
+                  <strong>Rain:</strong> {fish.weather.rain} in
+                </div>
+              )}
+              {hasValue(fish.weather?.cloud) && (
+                <div>
+                  <strong>Clouds:</strong> {fish.weather.cloud}%
+                </div>
+              )}
+            </div>
           </div>
 
           {fish.water?.summary && (
-            <div className="waterMini">
-              {hasValue(fish.water.summary.station) && (
-                <div>
-                  <strong>Station:</strong> {fish.water.summary.station}
-                </div>
-              )}
-
-              {hasValue(fish.water.summary.waterTemp) && (
-                <div>
-                  <strong>Water Temp:</strong> {fish.water.summary.waterTemp}°F
-                </div>
-              )}
-
-              {hasValue(fish.water.summary.waterTempSource) && (
-                <div>
-                  <strong>Water Source:</strong>{" "}
-                  {fish.water.summary.waterTempSource}
-                </div>
-              )}
-
-              {hasValue(fish.water.summary.flow) && (
-                <div>
-                  <strong>Flow:</strong> {fish.water.summary.flow} cfs
-                </div>
-              )}
-
-              {hasValue(fish.water.summary.gageHeight) && (
-                <div>
-                  <strong>Gage:</strong> {fish.water.summary.gageHeight} ft
-                </div>
-              )}
-
-              {hasValue(fish.water.summary.conductance) && (
-                <div>
-                  <strong>Conductance:</strong> {fish.water.summary.conductance}
-                </div>
-              )}
-
-              {hasValue(fish.water.summary.dissolvedOxygen) && (
-                <div>
-                  <strong>Dissolved Oxygen:</strong>{" "}
-                  {fish.water.summary.dissolvedOxygen}
-                </div>
-              )}
-
-              {hasValue(fish.water.summary.ph) && (
-                <div>
-                  <strong>pH:</strong> {fish.water.summary.ph}
-                </div>
-              )}
-
-              {hasValue(fish.water.summary.turbidity) && (
-                <div>
-                  <strong>Turbidity:</strong> {fish.water.summary.turbidity}
-                </div>
-              )}
-
-              {hasValue(fish.water.summary.precipitation) && (
-                <div>
-                  <strong>Water Rain:</strong>{" "}
-                  {fish.water.summary.precipitation}
-                </div>
-              )}
-
-              {hasValue(fish.water.summary.noaaWindSpeed) && (
-                <div>
-                  <strong>NOAA Wind:</strong> {fish.water.summary.noaaWindSpeed}{" "}
-                  mph
-                </div>
-              )}
-
-              {hasValue(fish.water.summary.noaaPressure) && (
-                <div>
-                  <strong>NOAA Pressure:</strong>{" "}
-                  {fish.water.summary.noaaPressure}
-                </div>
-              )}
+            <div className="logSection">
+              <p className="sectionLabel">Water</p>
+              <div className="waterMini">
+                {hasValue(fish.water.summary.station) && (
+                  <div>
+                    <strong>Station:</strong> {fish.water.summary.station}
+                  </div>
+                )}
+                {hasValue(fish.water.summary.waterTemp) && (
+                  <div>
+                    <strong>Water Temp:</strong> {fish.water.summary.waterTemp}
+                    °F
+                  </div>
+                )}
+                {hasValue(fish.water.summary.waterTempSource) && (
+                  <div>
+                    <strong>Water Source:</strong>{" "}
+                    {fish.water.summary.waterTempSource}
+                  </div>
+                )}
+                {hasValue(fish.water.summary.flow) && (
+                  <div>
+                    <strong>Flow:</strong> {fish.water.summary.flow} cfs
+                  </div>
+                )}
+                {hasValue(fish.water.summary.gageHeight) && (
+                  <div>
+                    <strong>Gage:</strong> {fish.water.summary.gageHeight} ft
+                  </div>
+                )}
+                {hasValue(fish.water.summary.conductance) && (
+                  <div>
+                    <strong>Conductance:</strong>{" "}
+                    {fish.water.summary.conductance}
+                  </div>
+                )}
+                {hasValue(fish.water.summary.dissolvedOxygen) && (
+                  <div>
+                    <strong>Dissolved Oxygen:</strong>{" "}
+                    {fish.water.summary.dissolvedOxygen}
+                  </div>
+                )}
+                {hasValue(fish.water.summary.ph) && (
+                  <div>
+                    <strong>pH:</strong> {fish.water.summary.ph}
+                  </div>
+                )}
+                {hasValue(fish.water.summary.turbidity) && (
+                  <div>
+                    <strong>Turbidity:</strong> {fish.water.summary.turbidity}
+                  </div>
+                )}
+                {hasValue(fish.water.summary.precipitation) && (
+                  <div>
+                    <strong>Water Rain:</strong>{" "}
+                    {fish.water.summary.precipitation}
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
           {fish.managedWater && (
-            <div className="waterMini">
-              <div>
-                <strong>Managed By:</strong> {fish.managedWater.provider}
-              </div>
-              <div>
-                <strong>System:</strong> {fish.managedWater.system}
-              </div>
-              {fish.managedWater.providerId === "georgia_power" && (
+            <div className="logSection">
+              <p className="sectionLabel">Managed Water</p>
+              <div className="waterMini">
                 <div>
-                  <strong>Status:</strong> Hydro generation lake
+                  <strong>Managed By:</strong> {fish.managedWater.provider}
                 </div>
-              )}
-
-              {fish.managedWater.providerId === "tva" && (
                 <div>
-                  <strong>Status:</strong> TVA current-generating reservoir
+                  <strong>System:</strong> {fish.managedWater.system}
                 </div>
-              )}
-
-              {fish.managedWater.providerId === "usace" && (
-                <div>
-                  <strong>Status:</strong> USACE flood-control reservoir
-                </div>
-              )}
-
-              {fish.managedWater.providerId === "duke_energy" && (
-                <div>
-                  <strong>Status:</strong> Duke Energy hydro reservoir
-                </div>
-              )}
-              <div>
-                <strong>Note:</strong> {fish.managedWater.note}
+                {fish.managedWater.providerId === "georgia_power" && (
+                  <div>
+                    <strong>Status:</strong> Hydro generation lake
+                  </div>
+                )}
+                {fish.managedWater.note && (
+                  <div>
+                    <strong>Note:</strong> {fish.managedWater.note}
+                  </div>
+                )}
               </div>
             </div>
           )}
 
           {fish.hydro && fish.hydro.sourceUsed !== "none" && (
-            <div className="waterMini">
-              {hasValue(fish.hydro.sourceUsed) && (
-                <div>
-                  <strong>Hydro Source:</strong> {fish.hydro.sourceUsed}
-                </div>
-              )}
-
-              {hasValue(fish.hydro.lakeLevelFt) && (
-                <div>
-                  <strong>Lake Level:</strong> {fish.hydro.lakeLevelFt} ft
-                </div>
-              )}
-
-              {hasValue(fish.hydro.fullPoolFt) && (
-                <div>
-                  <strong>Full Pool:</strong> {fish.hydro.fullPoolFt} ft
-                </div>
-              )}
-
-              {hasValue(fish.hydro.feetFromFullPool) && (
-                <div>
-                  <strong>From Full:</strong> {fish.hydro.feetFromFullPool} ft
-                </div>
-              )}
-
-              {hasValue(fish.hydro.turbineRelease) && (
-                <div>
-                  <strong>Turbine Release:</strong> {fish.hydro.turbineRelease}{" "}
-                  cfs
-                </div>
-              )}
-
-              {hasValue(fish.hydro.dischargeCfs) && (
-                <div>
-                  <strong>Flow:</strong> {fish.hydro.dischargeCfs} cfs
-                </div>
-              )}
-
-              {hasValue(fish.hydro.gageHeightFt) && (
-                <div>
-                  <strong>Gage:</strong> {fish.hydro.gageHeightFt} ft
-                </div>
-              )}
-
-              {hasValue(fish.hydro.generation) && (
-                <div>
-                  <strong>Units Running:</strong> {fish.hydro.generation}
-                </div>
-              )}
+            <div className="logSection">
+              <p className="sectionLabel">Hydro</p>
+              <div className="waterMini">
+                {hasValue(fish.hydro.sourceUsed) && (
+                  <div>
+                    <strong>Hydro Source:</strong> {fish.hydro.sourceUsed}
+                  </div>
+                )}
+                {hasValue(fish.hydro.lakeLevelFt) && (
+                  <div>
+                    <strong>Lake Level:</strong> {fish.hydro.lakeLevelFt} ft
+                  </div>
+                )}
+                {hasValue(fish.hydro.fullPoolFt) && (
+                  <div>
+                    <strong>Full Pool:</strong> {fish.hydro.fullPoolFt} ft
+                  </div>
+                )}
+                {hasValue(fish.hydro.feetFromFullPool) && (
+                  <div>
+                    <strong>From Full:</strong> {fish.hydro.feetFromFullPool} ft
+                  </div>
+                )}
+                {hasValue(fish.hydro.turbineRelease) && (
+                  <div>
+                    <strong>Turbine Release:</strong>{" "}
+                    {fish.hydro.turbineRelease} cfs
+                  </div>
+                )}
+                {hasValue(fish.hydro.dischargeCfs) && (
+                  <div>
+                    <strong>Flow:</strong> {fish.hydro.dischargeCfs} cfs
+                  </div>
+                )}
+                {hasValue(fish.hydro.gageHeightFt) && (
+                  <div>
+                    <strong>Gage:</strong> {fish.hydro.gageHeightFt} ft
+                  </div>
+                )}
+                {hasValue(fish.hydro.generation) && (
+                  <div>
+                    <strong>Units Running:</strong> {fish.hydro.generation}
+                  </div>
+                )}
+                {hasValue(fish.hydro.confidence) && (
+                  <div>
+                    <strong>Confidence:</strong> {fish.hydro.confidence}
+                  </div>
+                )}
+              </div>
 
               {Array.isArray(fish.hydro.releaseSchedule) &&
                 fish.hydro.releaseSchedule.length > 0 && (
-                  <div>
+                  <p className="logNotes">
                     <strong>Dam Schedule:</strong>{" "}
                     {fish.hydro.releaseSchedule
                       .map(
@@ -1258,21 +1192,17 @@ function SwipeCatchCard({
                           `${row.date} ${row.time}: ${row.units} unit(s)`,
                       )
                       .join(" • ")}
-                  </div>
+                  </p>
                 )}
-
-              {hasValue(fish.hydro.confidence) && (
-                <div>
-                  <strong>Confidence:</strong> {fish.hydro.confidence}
-                </div>
-              )}
             </div>
           )}
 
-          <p>
-            <strong>Moon:</strong>{" "}
-            {fish.moon ? `${getMoonIcon(fish.moon)} ${fish.moon}` : "--"}
-          </p>
+          <div className="logSection">
+            <p>
+              <strong>Moon:</strong>{" "}
+              {fish.moon ? `${getMoonIcon(fish.moon)} ${fish.moon}` : "--"}
+            </p>
+          </div>
 
           {fish.isLoadingConditions && (
             <div className="loadingConditions">
@@ -1281,7 +1211,10 @@ function SwipeCatchCard({
             </div>
           )}
 
-          <p className="muted">{fish.notes}</p>
+          <div className="logSection">
+            <p className="sectionLabel">Notes</p>
+            <p className="logNotes">{fish.notes || "No notes yet"}</p>
+          </div>
         </div>
       </section>
     </div>

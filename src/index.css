@@ -2124,3 +2124,86 @@ body {
 .lakeVideo {
   transform: scale(1.08);
 }
+/* CLEAN LOG CARD LAYOUT */
+
+.swipeCard.logCard {
+  display: block;
+  padding: 18px;
+}
+
+.logDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.logDetails p {
+  margin: 0;
+}
+
+.logDetails h2 {
+  margin: 0;
+  font-size: 32px;
+  line-height: 1.05;
+}
+
+.logSection {
+  padding-top: 12px;
+  border-top: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.logSection:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.logGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px 18px;
+}
+
+.logGrid div {
+  min-width: 0;
+  line-height: 1.25;
+}
+
+.logNotes {
+  margin-top: 4px;
+  padding: 14px;
+  border-radius: 16px;
+  background: rgba(2, 8, 20, 0.42);
+  color: #cbd5e1;
+  line-height: 1.35;
+}
+
+.weatherMini,
+.waterMini {
+  margin-top: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px 18px;
+  font-size: 15px;
+}
+
+.logPhoto {
+  margin-bottom: 16px;
+}
+
+.editCatchButton {
+  width: fit-content;
+  padding: 11px 16px;
+}
+
+@media (max-width: 520px) {
+  .logGrid,
+  .weatherMini,
+  .waterMini {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 14px;
+  }
+
+  .logDetails h2 {
+    font-size: 30px;
+  }
+}
