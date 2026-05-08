@@ -1,0 +1,2126 @@
+@import "./styles/predict.css";
+@import "./styles/addFish.css";
+
+html, body, #root {
+  margin: 0;
+  min-height: 100%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: #020814;
+  color: white;
+}
+
+.app {
+  min-height: 100vh;
+  padding-bottom: 98px;
+  background:
+    radial-gradient(circle at top left, rgba(14, 165, 233, 0.28), transparent 30%),
+    radial-gradient(circle at bottom right, rgba(34, 197, 94, 0.12), transparent 30%),
+    linear-gradient(180deg, #061524, #020814);
+}
+
+.screen {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 18px;
+}
+
+.homeHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 22px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.logo {
+  font-size: 44px;
+}
+
+.brand h1 {
+  margin: 0;
+  text-transform: uppercase;
+  font-size: 28px;
+}
+
+.brand p {
+  margin: 4px 0 0;
+  color: #cbd5e1;
+}
+
+.roundButton {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(148, 163, 184, 0.14);
+  color: white;
+  font-size: 24px;
+}
+
+.currentCard,
+.forecastStrip,
+.biteCard,
+.catchCard,
+.panel {
+  background: rgba(7, 24, 40, 0.88);
+  border: 1px solid rgba(125, 211, 252, 0.18);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+  border-radius: 22px;
+}
+
+.currentCard {
+  position: relative;
+  padding: 22px;
+  margin-bottom: 20px;
+}
+
+.location {
+  position: absolute;
+  right: 22px;
+  top: 22px;
+  font-weight: 800;
+}
+
+.sectionLabel {
+  margin: 0 0 14px;
+  color: #60a5fa;
+  text-transform: uppercase;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+.green {
+  color: #86efac;
+}
+
+.currentMain {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.bigTemp {
+  font-size: 72px;
+  font-weight: 900;
+}
+
+.bigWeather {
+  font-size: 56px;
+}
+
+.currentMain h2 {
+  margin: 0;
+  font-size: 26px;
+}
+
+.currentMain p {
+  margin: 6px 0 0;
+  color: #cbd5e1;
+}
+
+.weatherStats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-top: 22px;
+}
+
+.weatherStats div {
+  border-left: 1px solid rgba(148, 163, 184, 0.18);
+  padding-left: 14px;
+}
+
+.weatherStats span {
+  display: block;
+  margin-top: 5px;
+  color: #94a3b8;
+}
+
+.sectionTitle {
+  color: #60a5fa;
+  text-transform: uppercase;
+  font-size: 20px;
+  margin: 0 0 10px;
+}
+
+.forecastStrip {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  overflow: hidden;
+  margin-bottom: 18px;
+}
+
+.dayCard {
+  min-height: 190px;
+  padding: 12px 6px;
+  text-align: center;
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  border-left: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.dayCard:first-child {
+  border-left: 0;
+}
+
+.selectedDay {
+  background: rgba(148, 163, 184, 0.14);
+  border-radius: 18px;
+  margin: 8px;
+}
+
+.dayCard strong {
+  font-size: 17px;
+}
+
+.date {
+  font-size: 16px;
+  font-weight: 800;
+  color: #cbd5e1;
+}
+
+.forecastIcon {
+  font-size: 28px;
+  margin-top: 6px;
+}
+
+.high {
+  font-size: 26px;
+  font-weight: 900;
+}
+
+.low {
+  font-size: 21px;
+  color: #94a3b8;
+  font-weight: 800;
+}
+
+.rain {
+  font-size: 14px;
+  font-weight: 800;
+  color: #bfdbfe;
+}
+
+.homeGrid {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 18px;
+}
+
+.biteCard,
+.catchCard,
+.panel {
+  padding: 20px;
+}
+
+.biteContent {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  font-size: 20px;
+  line-height: 1.45;
+}
+
+.lure {
+  font-size: 48px;
+}
+
+.greenButton {
+  width: 100%;
+  border: 0;
+  border-radius: 14px;
+  background: rgba(34, 197, 94, 0.15);
+  color: #86efac;
+  padding: 16px;
+  font-size: 18px;
+  font-weight: 900;
+  display: flex;
+  justify-content: space-between;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+}
+
+.cardHeader button {
+  background: none;
+  border: 0;
+  color: #bfdbfe;
+  font-size: 16px;
+}
+
+.catchItem {
+  display: grid;
+  grid-template-columns: 70px 1fr auto;
+  gap: 14px;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+.catchItem:last-child {
+  border-bottom: 0;
+}
+
+.thumb {
+  height: 58px;
+  border-radius: 12px;
+  background: rgba(125, 211, 252, 0.14);
+  display: grid;
+  place-items: center;
+  font-size: 28px;
+}
+
+.catchItem strong {
+  font-size: 20px;
+}
+
+.catchItem p {
+  margin: 5px 0;
+  color: #cbd5e1;
+}
+
+.catchItem small {
+  color: #86efac;
+  font-weight: 800;
+}
+
+.catchItem span {
+  color: #cbd5e1;
+}
+
+.bottomNav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+
+  height: 70px;
+
+  background: #111;
+  border-top: 1px solid #333;
+
+  z-index: 999;
+}
+
+.bottomNav button {
+  border: 0;
+  background: transparent;
+  color: #94a3b8;
+  display: grid;
+  place-items: center;
+  gap: 3px;
+  font-size: 22px;
+}
+
+.bottomNav span {
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.bottomNav .active {
+  color: #38bdf8;
+}
+
+.addButton {
+  width: 66px;
+  height: 66px;
+  border-radius: 50% !important;
+  background: #38bdf8 !important;
+  color: white !important;
+  font-size: 40px !important;
+  transform: translateY(-18px);
+  box-shadow: 0 14px 35px rgba(56, 189, 248, 0.45);
+}
+
+@media (max-width: 760px) {
+  .screen {
+  height: 100vh;
+  overflow-y: auto;
+  padding-bottom: 90px;
+}
+
+  .brand h1 {
+    font-size: 24px;
+  }
+
+  .currentMain {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .bigTemp {
+    font-size: 64px;
+  }
+
+  .weatherStats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+ 
+
+  .homeGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .location {
+    position: static;
+    margin-bottom: 12px;
+  }
+}
+.logCard {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.logPhoto {
+  width: 100%;
+  height: auto;
+  border-radius: 18px;
+  overflow: hidden;
+  background: rgba(125, 211, 252, 0.14);
+  display: grid;
+  place-items: center;
+  font-size: 52px;
+}
+
+.logPhoto img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+}
+
+.logDetails h2 {
+  margin: 0 0 8px;
+}
+
+.logDetails p {
+  margin: 7px 0;
+}
+.mapItem {
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(125, 211, 252, 0.08);
+  margin-bottom: 10px;
+}
+.mapPanel {
+  padding: 0;
+  overflow: hidden;
+}
+
+.leafletMap {
+  height: 65vh;
+  min-height: 420px;
+  width: 100%;
+}
+
+.mapItem {
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(125, 211, 252, 0.08);
+  margin-bottom: 10px;
+}
+
+.leaflet-container {
+  background: #020617;
+}
+.mapPanel {
+  padding: 0;
+  overflow: hidden;
+}
+
+.mapboxWrapper {
+  height: 68vh;
+  min-height: 420px;
+  width: 100%;
+}
+
+.fishMarker {
+  border: none;
+  background: rgba(2, 8, 20, 0.85);
+  border-radius: 999px;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 5px;
+  overflow: hidden;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.4);
+  backdrop-filter: blur(6px);
+}
+
+.fishMarker img {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+}
+
+.mapboxgl-popup-content {
+  color: #020617;
+  border-radius: 10px;
+}
+.swipeWrap {
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px;
+  margin-bottom: 18px;
+}
+
+.swipeCard {
+  background: #0b1a24;
+  position: relative;
+  z-index: 2;
+  transition: transform 0.18s ease;
+  border-radius: 24px;
+}
+
+/* THIS is the fix */
+.deleteReveal {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;   /* 👈 force it to match card height */
+  width: 120px;
+  border: 0;
+  background: #dc2626;
+  color: white;
+  font-weight: 900;
+  font-size: 16px;
+  z-index: 1;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.weatherMini {
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  font-size: 13px;
+  opacity: 0.9;
+}
+.logRow {
+  display: flex;
+  gap: 12px;
+}
+
+.logPhoto {
+  width: 120px;
+  min-width: 120px;
+}
+
+.logPhoto img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.logDetails {
+  flex: 1;
+}
+.swipeWrap {
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px;
+  margin-bottom: 18px;
+}
+
+.swipeCard {
+  background: #0b1a24;
+  position: relative;
+  z-index: 2;
+  transition: transform 0.18s ease;
+  border-radius: 24px;
+  margin-bottom: 0;
+  display: block;
+}
+
+.deleteReveal {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 120px;
+  border: 0;
+  background: #dc2626;
+  color: white;
+  font-weight: 900;
+  font-size: 16px;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logPhoto {
+  width: 100%;
+  height: 180px;
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.logPhoto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.weatherMini {
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  font-size: 13px;
+}
+.swipeCard .logPhoto {
+  width: 100%;
+  height: auto !important;
+  max-height: none !important;
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 14px;
+  background: #000;
+}
+
+.swipeCard .logPhoto img {
+  width: 100% !important;
+  height: auto !important;
+  max-height: none !important;
+  object-fit: contain !important;
+  display: block;
+}
+.waterMini {
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  font-size: 13px;
+}
+.editCatchPanel {
+  margin: 14px 0 18px;
+  padding: 16px;
+  border-radius: 20px;
+  background: rgba(2, 6, 23, 0.72);
+  border: 1px solid rgba(125, 211, 252, 0.22);
+  display: grid;
+  gap: 12px;
+}
+
+.editCatchPanel input,
+.editCatchPanel textarea,
+.editCatchPanel select {
+  font-size: 15px;
+  padding: 13px;
+  border-radius: 14px;
+}
+
+.editGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.editGrid.two {
+  grid-template-columns: 1fr 1fr;
+}
+
+.editCatchButton {
+  margin: 10px 0;
+  border: 1px solid rgba(125, 211, 252, 0.3);
+  background: rgba(56, 189, 248, 0.12);
+  color: #bfdbfe;
+  border-radius: 14px;
+  padding: 12px;
+  font-weight: 900;
+}
+
+.saveEditButton {
+  border: 0;
+  border-radius: 14px;
+  background: rgba(34, 197, 94, 0.18);
+  color: #86efac;
+  padding: 14px;
+  font-weight: 900;
+}
+
+@media (max-width: 520px) {
+  .editGrid.two {
+    grid-template-columns: 1fr;
+  }
+}
+.editPagePhoto {
+  width: 100%;
+  border-radius: 20px;
+  margin-bottom: 14px;
+}
+
+.editSectionTitle {
+  margin: 18px 0 4px;
+  color: #86efac;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.editDateInput {
+  text-align: left;
+  min-height: 56px;
+}
+
+.editSpacerBottom {
+  height: 120px;
+}
+.editDateInput {
+  width: 100% !important;
+  max-width: 100% !important;
+  display: block;
+  text-align: left;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.formPanel {
+  overflow: hidden;
+}
+.fish-id-card {
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(12, 18, 24, 0.92);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+.fish-id-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: 12px;
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.fish-id-header h2 {
+  margin: 4px 0 0;
+}
+
+.confidence-badge {
+  min-width: 56px;
+  height: 56px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: rgba(255,255,255,0.12);
+  font-weight: 800;
+}
+
+.guess-list {
+  margin-top: 14px;
+  display: grid;
+  gap: 8px;
+}
+
+.guess-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.08);
+}
+
+.trait-box {
+  margin-top: 14px;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.07);
+}
+
+.trait-box h3 {
+  margin: 0 0 8px;
+  font-size: 15px;
+}
+
+.trait-box ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.confirm-area {
+  margin-top: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.confirm-area button,
+.confirm-area select {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  font-weight: 700;
+}
+
+.saved-note {
+  margin: 12px 0 0;
+  color: #9cff9c;
+  font-weight: 700;
+}
+.mapPopup {
+  width: 190px;
+  color: #0b1720;
+  font-family: inherit;
+}
+
+.mapPopup img {
+  width: 100%;
+  height: 115px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
+
+.mapPopup h3 {
+  margin: 0 0 4px;
+  font-size: 18px;
+  color: #07111a;
+}
+
+.mapPopup p {
+  margin: 4px 0;
+  font-size: 13px;
+  color: #1f2933;
+}
+
+.mapboxgl-popup-content {
+  border-radius: 16px !important;
+  padding: 10px !important;
+}
+.fishMarker {
+  position: relative;
+}
+
+.fishBurst {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 44px;
+  pointer-events: none;
+  animation: fishBoom 700ms ease-out forwards;
+  z-index: 10;
+}
+
+@keyframes fishBoom {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0.2) rotate(0deg);
+  }
+  60% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.5) rotate(15deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(2.4) rotate(-20deg);
+  }
+}
+.map-picker-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #050807;
+}
+
+.map-picker-bar {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 90px;
+  display: flex;
+  gap: 10px;
+  z-index: 10;
+}
+
+.map-picker-bar button {
+  flex: 1;
+  padding: 14px;
+  border-radius: 14px;
+  border: none;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.map-picker-bar button:disabled {
+  opacity: 0.45;
+}
+
+.picked-location-marker {
+  font-size: 38px;
+  transform: translateY(-8px);
+}
+.loadingConditions {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(99, 255, 160, 0.09);
+  border: 1px solid rgba(99, 255, 160, 0.22);
+  color: #bfffd4;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  animation: loadingPulseBox 1.4s ease-in-out infinite;
+}
+
+.loadingDot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: #63ffa0;
+  box-shadow: 0 0 12px rgba(99, 255, 160, 0.9);
+  animation: loadingPulseDot 0.8s ease-in-out infinite;
+}
+
+@keyframes loadingPulseBox {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.75;
+  }
+
+  50% {
+    transform: scale(1.01);
+    opacity: 1;
+  }
+}
+
+@keyframes loadingPulseDot {
+  0%, 100% {
+    transform: scale(0.8);
+    opacity: 0.45;
+  }
+
+  50% {
+    transform: scale(1.35);
+    opacity: 1;
+  }
+}
+.fishMarker {
+  width: 54px;
+  height: 54px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(46, 75, 45, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px;
+  overflow: hidden;
+  position: relative;
+}
+
+.fishMarker img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  pointer-events: none;
+}
+
+.fishMarker:active {
+  transform: scale(0.94);
+}
+
+.fishBurst {
+  position: absolute;
+  inset: -18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 34px;
+  pointer-events: none;
+  z-index: 2;
+  animation: fishBurstPop 0.7s ease-out forwards;
+}
+
+@keyframes fishBurstPop {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+
+  30% {
+    transform: scale(1.25);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+.fishIconInner {
+  width: 100%;
+  height: 100%;
+}
+
+.fishIconSprite {
+  width: 100%;
+  height: 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+/* MAP LAYER BUTTON + MENU */
+
+.mapPanel {
+  position: relative;
+}
+
+
+
+.fishMarkerWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* CLEAN MAP MARKERS */
+
+.mapPanel {
+  position: relative;
+  padding: 0;
+  overflow: hidden;
+}
+
+.mapboxWrapper {
+  height: 68vh;
+  min-height: 420px;
+  width: 100%;
+}
+
+.fishMarkerWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fishMarker {
+  width: 54px;
+  height: 54px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(46, 75, 45, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
+}
+
+.fishIconInner {
+  width: 100%;
+  height: 100%;
+}
+
+.fishIconSprite {
+  width: 100%;
+  height: 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+.fishMarker:active {
+  transform: scale(0.94);
+}
+
+.fishBurst {
+  position: absolute;
+  inset: -18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 34px;
+  pointer-events: none;
+  z-index: 2;
+  animation: fishBurstPop 0.7s ease-out forwards;
+}
+
+@keyframes fishBurstPop {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+
+  30% {
+    transform: scale(1.25);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}.mapLayersControl {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 60;
+}
+
+.layersButton {
+  background: rgba(2, 6, 23, 0.92);
+  color: white;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 16px;
+  padding: 12px 18px;
+  font-weight: 900;
+}
+
+.layersMenu {
+  position: absolute;
+  top: 52px;
+  right: 0;
+  width: 210px;
+  background: rgba(2, 6, 23, 0.96);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 18px;
+  padding: 12px;
+  display: grid;
+  gap: 12px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(12px);
+}
+
+.layersMenu label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: white;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.layersMenu input {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+}
+.waterStationMarker {
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  border: 2px solid rgba(191, 219, 254, 0.95);
+  background: rgba(14, 165, 233, 0.9);
+  color: white;
+  display: grid;
+  place-items: center;
+  font-size: 19px;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.45);
+}
+.mapboxgl-marker {
+  z-index: 30 !important;
+}
+
+.waterStationMarker {
+  width: 46px !important;
+  height: 46px !important;
+  border-radius: 999px !important;
+  border: 3px solid white !important;
+  background: #0ea5e9 !important;
+  color: white !important;
+  display: grid !important;
+  place-items: center !important;
+  font-size: 24px !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+  box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.35), 0 8px 18px rgba(0,0,0,0.5) !important;
+}
+.stationDebug {
+  position: absolute;
+  left: 14px;
+  top: 14px;
+  z-index: 50;
+  background: rgba(0, 0, 0, 0.82);
+  color: white;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 900;
+}
+.tempMarker {
+  color: white !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.65);
+}
+.homeLocationButton {
+  border: 1px solid rgba(125, 211, 252, 0.35);
+  background: rgba(56, 189, 248, 0.12);
+  color: #bfdbfe;
+  border-radius: 14px;
+  padding: 10px 14px;
+  font-weight: 900;
+  margin-bottom: 14px;
+}
+
+.homeLocationSettings {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(2, 6, 23, 0.55);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.homeLocationSettings button {
+  border: 0;
+  border-radius: 14px;
+  padding: 13px;
+  font-weight: 900;
+  background: rgba(34, 197, 94, 0.16);
+  color: #86efac;
+}
+
+.defaultLocationRow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+}
+
+@media (max-width: 520px) {
+  .defaultLocationRow {
+    grid-template-columns: 1fr;
+  }
+}
+.sectionTitleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.miniToggleButton {
+  border: 1px solid rgba(125, 211, 252, 0.35);
+  background: rgba(8, 30, 47, 0.85);
+  color: white;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-weight: 800;
+}
+.heroCard {
+  background: #111;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.heroMain {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.heroTemp {
+  font-size: 48px;
+  font-weight: 700;
+}
+
+.heroStats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin-top: 12px;
+  gap: 10px;
+}
+
+.heroStats div {
+  text-align: center;
+}
+
+.hourlyStrip {
+  display: flex;
+  overflow-x: auto;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.hourCard {
+  min-width: 60px;
+  background: #1a1a1a;
+  padding: 10px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.forecastStrip {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  margin-bottom: 16px;
+}
+
+.dayCard {
+  background: #1a1a1a;
+  border-radius: 10px;
+  padding: 10px;
+  min-width: 70px;
+}
+
+.selectedDay {
+  background: #2a2a2a;
+}
+
+.detailCard {
+  background: #111;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.detailGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.homeContainer {
+  min-height: 100vh;
+  background: linear-gradient(to bottom, #0a0f1c, #05070d);
+  color: #fff;
+  padding: 16px;
+  padding-bottom: 120px;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+}.homeHero {
+  position: relative;
+  border-radius: 24px;
+  padding: 24px;
+  margin-bottom: 20px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(10px);
+}
+
+.homeHero.sunny {
+  background: linear-gradient(to bottom, #1a2a4f, #0a0f1c);
+}
+
+.homeHero.rain {
+  background: linear-gradient(to bottom, #1c2333, #05070d);
+}
+
+.heroBg {
+  position: absolute;
+  inset: 0;
+  opacity: 0.25;
+  background-size: cover;
+  background-position: center;
+}
+
+.heroContent {
+  position: relative;
+  z-index: 2;
+}
+
+.heroTop {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.locationLabel {
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+.currentTime {
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+.heroMain {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.heroTemp {
+  font-size: 64px;
+  font-weight: 600;
+}
+
+.heroCondition {
+  font-size: 20px;
+  opacity: 0.9;
+}
+
+.heroRange {
+  margin-top: 6px;
+  opacity: 0.7;
+}
+.hourlyStrip {
+  display: flex;
+  overflow-x: auto;
+  gap: 12px;
+  margin-top: 18px;
+  padding-bottom: 6px;
+}
+
+.hourCard {
+  min-width: 64px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 14px;
+  padding: 10px;
+  text-align: center;
+  backdrop-filter: blur(8px);
+}
+
+.hourCard strong {
+  font-size: 14px;
+}
+
+.hourCard span {
+  font-size: 18px;
+}
+
+.hourCard small {
+  font-size: 12px;
+  opacity: 0.6;
+}.dailyWeatherRow {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  margin-bottom: 16px;
+}
+
+.dailyWeatherTile {
+  min-width: 72px;
+  padding: 10px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.05);
+  text-align: center;
+  transition: 0.2s;
+}
+
+.dailyWeatherTile.selected {
+  background: rgba(255,255,255,0.15);
+}
+
+.dailyWeatherTile strong {
+  font-size: 14px;
+}
+
+.dailyWeatherTile span {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.dailyWeatherTile em {
+  font-size: 18px;
+  display: block;
+  margin: 4px 0;
+}.weatherPanel {
+  background: rgba(255,255,255,0.05);
+  border-radius: 20px;
+  padding: 16px;
+  margin-bottom: 16px;
+  backdrop-filter: blur(10px);
+}
+
+.panelHeader {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.panelHeader h2 {
+  font-size: 16px;
+}
+
+.panelHeader span {
+  font-size: 12px;
+  opacity: 0.6;
+}.weatherMetricGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.weatherMetricGrid div {
+  background: rgba(255,255,255,0.05);
+  border-radius: 14px;
+  padding: 12px;
+  text-align: center;
+}
+
+.weatherMetricGrid strong {
+  display: block;
+  font-size: 18px;
+}
+
+.weatherMetricGrid span {
+  font-size: 12px;
+  opacity: 0.6;
+}.sunRow {
+  display: flex;
+  justify-content: space-between;
+}
+
+.sunRow div {
+  text-align: center;
+  flex: 1;
+}
+
+.sunRow strong {
+  font-size: 18px;
+}
+
+.sunRow span {
+  font-size: 12px;
+  opacity: 0.6;
+}.fishOutlookPanel p {
+  font-size: 14px;
+  line-height: 1.4;
+  opacity: 0.85;
+  margin-bottom: 10px;
+}
+
+.fishOutlookPanel button {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  background: #00c2ff;
+  border: none;
+  color: #000;
+  font-weight: 600;
+}
+.homeBottomSpacer {
+  height: 100px;
+}
+.homeHero.sunny::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 70% 20%, rgba(255,255,0,0.2), transparent);
+  animation: glow 6s infinite alternate;
+}
+
+@keyframes glow {
+  from { opacity: 0.3; }
+  to { opacity: 0.6; }
+}
+.weatherHomeFixed {
+  min-height: 100vh;
+  padding: 54px 16px 130px;
+  color: white;
+  background: linear-gradient(180deg, #071827, #020814);
+}
+
+.weatherHeroFixed {
+  position: relative;
+  overflow: hidden;
+  min-height: 430px;
+  margin: -54px -16px 18px;
+  padding: 58px 16px 24px;
+  border-bottom-left-radius: 34px;
+  border-bottom-right-radius: 34px;
+  background: linear-gradient(180deg, #18384d 0%, #07131d 58%, #041018 100%);
+  box-shadow: 0 22px 50px rgba(0,0,0,0.38);
+}
+
+.lakeWeatherScene {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.skyGlow {
+  position: absolute;
+  width: 430px;
+  height: 430px;
+  top: -130px;
+  right: -135px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,224,105,.9), rgba(255,170,50,.25) 42%, transparent 68%);
+  animation: lakeSunPulse 5s ease-in-out infinite alternate;
+}
+
+.cloudBank {
+  position: absolute;
+  width: 520px;
+  height: 145px;
+  top: 125px;
+  left: -260px;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 20% 55%, rgba(255,255,255,.34), transparent 35%),
+    radial-gradient(circle at 48% 38%, rgba(255,255,255,.26), transparent 40%),
+    radial-gradient(circle at 76% 58%, rgba(255,255,255,.22), transparent 40%);
+  filter: blur(12px);
+  animation: lakeCloudDrift 18s linear infinite;
+}
+
+.lakeSurface {
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  bottom: -8px;
+  height: 155px;
+  background:
+    linear-gradient(180deg, rgba(14,68,91,.35), rgba(1,15,24,.98)),
+    repeating-linear-gradient(178deg, rgba(255,255,255,.14) 0 1px, transparent 4px 15px);
+  transform: perspective(500px) rotateX(58deg);
+  transform-origin: bottom;
+}
+
+.lakeSurface span {
+  position: absolute;
+  left: -30%;
+  width: 160%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.38), transparent);
+  animation: lakeRipple 4s linear infinite;
+}
+
+.lakeSurface span:nth-child(1) { top: 28px; animation-delay: 0s; }
+.lakeSurface span:nth-child(2) { top: 58px; animation-delay: .8s; }
+.lakeSurface span:nth-child(3) { top: 92px; animation-delay: 1.6s; }
+.lakeSurface span:nth-child(4) { top: 122px; animation-delay: 2.4s; }
+
+.rain .skyGlow,
+.storm .skyGlow {
+  opacity: .16;
+}
+
+.rain .rainLayer span,
+.storm .rainLayer span {
+  position: absolute;
+  top: -150px;
+  width: 2px;
+  height: 130px;
+  border-radius: 999px;
+  background: linear-gradient(to bottom, transparent, rgba(255,255,255,.78), transparent);
+  animation: lakeRain .65s linear infinite;
+}
+
+.rainLayer span:nth-child(1) { left: 5%; animation-delay: 0s; }
+.rainLayer span:nth-child(2) { left: 15%; animation-delay: .1s; }
+.rainLayer span:nth-child(3) { left: 25%; animation-delay: .22s; }
+.rainLayer span:nth-child(4) { left: 35%; animation-delay: .05s; }
+.rainLayer span:nth-child(5) { left: 45%; animation-delay: .32s; }
+.rainLayer span:nth-child(6) { left: 55%; animation-delay: .14s; }
+.rainLayer span:nth-child(7) { left: 65%; animation-delay: .25s; }
+.rainLayer span:nth-child(8) { left: 75%; animation-delay: .08s; }
+.rainLayer span:nth-child(9) { left: 85%; animation-delay: .2s; }
+.rainLayer span:nth-child(10) { left: 95%; animation-delay: .36s; }
+
+.storm .lightningFlash {
+  position: absolute;
+  inset: 0;
+  background: rgba(190,225,255,.65);
+  animation: lakeLightning 4.7s infinite;
+}
+
+.weatherTopFixed {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.fishLogoFixed,
+.settingsFixed,
+.locationFixed {
+  border: 0;
+  color: white;
+  background: rgba(255,255,255,.18);
+  backdrop-filter: blur(18px) saturate(150%);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  border-radius: 999px;
+  padding: 11px 15px;
+  font-weight: 900;
+}
+
+.locationFixed {
+  flex: 1;
+  text-align: left;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.mainConditionFixed {
+  margin-top: 62px;
+}
+
+.mainConditionFixed p {
+  font-size: 34px;
+  font-weight: 900;
+  margin: 0;
+}
+
+.mainConditionFixed h1 {
+  font-size: 92px;
+  line-height: .9;
+  margin: 12px 0;
+  letter-spacing: -5px;
+}
+
+.mainConditionFixed h2 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.mainConditionFixed span {
+  display: block;
+  margin-top: 10px;
+  color: rgba(255,255,255,.75);
+}
+
+.biteScoreHero {
+  margin-top: 12px;
+  display: inline-block;
+  background: rgba(0,0,0,.36);
+  padding: 9px 15px;
+  border-radius: 999px;
+  font-weight: 900;
+}
+
+.outlookFixed,
+.weatherPanelFixed {
+  background: linear-gradient(180deg, rgba(255,255,255,.19), rgba(255,255,255,.08));
+  border: 1px solid rgba(255,255,255,.2);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  border-radius: 28px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.22), 0 14px 34px rgba(0,0,0,.28);
+}
+
+.outlookFixed h2,
+.weatherPanelFixed h2 {
+  margin: 0 0 8px;
+  font-size: 26px;
+}
+
+.outlookFixed p,
+.weatherPanelFixed p {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.38;
+  color: rgba(255,255,255,.88);
+}
+
+.hourStripFixed,
+.dailyFixed {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+}
+
+.hourStripFixed {
+  margin-top: 18px;
+}
+
+.hourStripFixed div,
+.dailyFixed button,
+.metricGridFixed div,
+.sunMoonFixed div {
+  background: rgba(255,255,255,.14);
+  border: 1px solid rgba(255,255,255,.2);
+  backdrop-filter: blur(22px) saturate(145%);
+  -webkit-backdrop-filter: blur(22px) saturate(145%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 10px 24px rgba(0,0,0,.22);
+}
+
+.hourStripFixed div {
+  min-width: 82px;
+  border-radius: 20px;
+  padding: 12px 9px;
+  text-align: center;
+}
+
+.hourStripFixed span,
+.hourStripFixed small {
+  display: block;
+  color: rgba(255,255,255,.72);
+}
+
+.hourStripFixed b {
+  display: block;
+  font-size: 27px;
+  margin: 5px 0;
+}
+
+.hourStripFixed strong {
+  display: block;
+  font-size: 24px;
+}
+
+.dailyFixed {
+  margin-bottom: 16px;
+}
+
+.dailyFixed button {
+  min-width: 82px;
+  border-radius: 22px;
+  padding: 13px 8px;
+  color: white;
+  text-align: center;
+}
+
+.dailyFixed button.active {
+  background: linear-gradient(180deg, rgba(255,255,255,.34), rgba(255,255,255,.17));
+}
+
+.dailyFixed strong,
+.dailyFixed span,
+.dailyFixed b,
+.dailyFixed small,
+.dailyFixed em {
+  display: block;
+}
+
+.dailyFixed span {
+  font-size: 29px;
+  margin: 8px 0;
+}
+
+.dailyFixed b {
+  font-size: 24px;
+}
+
+.dailyFixed em {
+  margin-top: 6px;
+  font-style: normal;
+  color: rgba(255,255,255,.76);
+}
+
+.metricGridFixed {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.metricGridFixed div,
+.sunMoonFixed div {
+  border-radius: 18px;
+  padding: 14px;
+}
+
+.metricGridFixed strong,
+.sunMoonFixed strong {
+  display: block;
+  font-size: 22px;
+}
+
+.metricGridFixed span,
+.sunMoonFixed span {
+  color: rgba(255,255,255,.68);
+}
+
+.sunMoonFixed {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.weatherPanelFixed button {
+  width: 100%;
+  margin-top: 16px;
+  border: 0;
+  border-radius: 18px;
+  padding: 16px;
+  background: #21c7f6;
+  color: #021018;
+  font-weight: 900;
+  font-size: 16px;
+}
+
+.homeBottomSpacer {
+  height: 100px;
+}
+
+@keyframes lakeSunPulse {
+  from { transform: scale(.95); opacity: .45; }
+  to { transform: scale(1.18); opacity: .95; }
+}
+
+@keyframes lakeCloudDrift {
+  from { transform: translateX(-240px); }
+  to { transform: translateX(135vw); }
+}
+
+@keyframes lakeRipple {
+  from { transform: translateX(-18%); opacity: .15; }
+  50% { opacity: .6; }
+  to { transform: translateX(18%); opacity: .15; }
+}
+
+@keyframes lakeRain {
+  from { transform: translateY(-160px) rotate(16deg); }
+  to { transform: translateY(560px) rotate(16deg); }
+}
+
+@keyframes lakeLightning {
+  0%, 88%, 100% { opacity: 0; }
+  89% { opacity: .75; }
+  90% { opacity: 0; }
+  92% { opacity: .38; }
+  93% { opacity: 0; }
+}
+.scenicSunny {
+  background:
+    linear-gradient(180deg, #8fc9ff 0%, #e8f5ff 36%, #173d27 62%, #07131d 100%);
+  animation: slowPushIn 18s ease-in-out infinite alternate;
+}
+
+.lakeSky,
+.lakeHills,
+.lakeWater,
+.lakeLight {
+  position: absolute;
+  inset: 0;
+}
+
+.lakeSky {
+  background:
+    radial-gradient(circle at 50% 35%, rgba(255, 238, 160, 0.95), rgba(255, 206, 80, 0.28) 12%, transparent 26%),
+    radial-gradient(circle at 20% 16%, rgba(255,255,255,.9), transparent 18%),
+    radial-gradient(circle at 72% 18%, rgba(255,255,255,.85), transparent 22%),
+    linear-gradient(180deg, #86c8ff 0%, #eaf7ff 48%, transparent 49%);
+}
+
+.lakeHills {
+  top: 38%;
+  background:
+    radial-gradient(ellipse at 15% 80%, #1d5a31 0%, #174528 34%, transparent 35%),
+    radial-gradient(ellipse at 85% 80%, #28693b 0%, #174528 36%, transparent 37%),
+    linear-gradient(180deg, transparent 0 52%, #133b25 53% 62%, transparent 63%);
+  filter: saturate(1.15);
+}
+
+.lakeWater {
+  top: 58%;
+  background:
+    linear-gradient(180deg, rgba(255, 224, 120, .35), rgba(27, 92, 77, .72), rgba(4, 20, 28, .96)),
+    repeating-linear-gradient(
+      178deg,
+      rgba(255,255,255,.26) 0px,
+      rgba(255,255,255,.26) 1px,
+      transparent 3px,
+      transparent 13px
+    );
+  animation: waterMove 3.4s linear infinite;
+}
+
+.lakeLight {
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255, 240, 150, .72), transparent 18%),
+    linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent);
+  mix-blend-mode: screen;
+  animation: sunlightPulse 5s ease-in-out infinite alternate;
+}
+
+@keyframes slowPushIn {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.08);
+  }
+}
+
+@keyframes waterMove {
+  from {
+    background-position: 0 0, 0 0;
+  }
+  to {
+    background-position: 0 0, 80px 28px;
+  }
+}
+
+@keyframes sunlightPulse {
+  from {
+    opacity: .65;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.lakeVideoWrap {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.lakeVideo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.08);
+  filter: saturate(1.1) contrast(1.05);
+}
+
+.lakeOverlayGlow {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 60% 35%, rgba(255, 220, 120, 0.35), transparent 40%),
+    linear-gradient(180deg, rgba(0,0,0,0.1), rgba(0,0,0,0.6));
+}
+.lakeVideoWrap {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.lakeVideo {
+  position: absolute;
+  width: 120%;
+  height: 120%;
+  top: -10%;
+  left: -10%;
+  object-fit: cover;
+
+  /* smooth cinematic feel */
+  filter: brightness(1.15) contrast(1.02) saturate(1.08);
+
+  /* subtle motion instead of “hard loop” */
+  animation: none !important;
+}
+
+.lakeVideoOverlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(0,0,0,0.58) 0%,
+      rgba(0,0,0,0.18) 35%,
+      rgba(0,0,0,0.45) 100%
+    ),
+    linear-gradient(
+      to right,
+      rgba(0,0,0,0.42) 0%,
+      rgba(0,0,0,0.05) 50%
+    );
+}
+
+@keyframes slowDrift {
+  0%   { transform: scale(1.1) translateY(0px); }
+  50%  { transform: scale(1.1) translateY(-12px); }
+  100% { transform: scale(1.1) translateY(0px); }
+}
+.weatherHeroFixed {
+  position: relative !important;
+  overflow: hidden !important;
+  background: #000 !important;
+}
+
+.lakeVideoWrap {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 1 !important;
+  overflow: hidden !important;
+  display: block !important;
+}
+
+.lakeVideo {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+  z-index: 1 !important;
+  opacity: 1 !important;
+}
+
+.lakeVideoOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.02),
+    rgba(0,0,0,0.12)
+  );
+}
+.weatherTopFixed,
+.mainConditionFixed {
+  position: relative !important;
+  z-index: 5 !important;
+}
+.lakeVideo {
+  pointer-events: none;
+}
+.lakeVideo {
+  transition: opacity 0.4s ease;
+}
+.lakeVideo {
+  filter: brightness(1.15) contrast(1.02) saturate(1.08) !important;
+  opacity: 1 !important;
+}
+
+.lakeVideoOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  display: block !important;
+  background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.02),
+    rgba(0,0,0,0.12)
+  ) !important;
+}
+.lakeVideo {
+  transform: scale(1.08);
+}

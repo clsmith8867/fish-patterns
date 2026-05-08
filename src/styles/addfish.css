@@ -1,0 +1,140 @@
+.formPanel {
+  display: grid;
+  gap: 16px;
+}
+
+label {
+  display: grid;
+  gap: 8px;
+  color: #cbd5e1;
+  font-weight: 800;
+}
+
+input,
+textarea,
+select {
+  width: 100%;
+  border: 1px solid rgba(148, 163, 184, 0.32);
+  background: #020617;
+  color: white;
+  border-radius: 16px;
+  padding: 14px;
+  font-size: 16px;
+}
+
+textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.twoCol {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.saveFishButton {
+  margin-top: 8px;
+}
+
+@media (max-width: 520px) {
+  .twoCol {
+    grid-template-columns: 1fr;
+  }
+}
+.cameraPanel {
+  display: grid;
+  gap: 14px;
+}
+
+.cameraBox {
+  height: 240px;
+  border: 2px dashed rgba(134, 239, 172, 0.35);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at center, rgba(34, 197, 94, 0.18), transparent 55%),
+    rgba(2, 6, 23, 0.55);
+  display: grid;
+  place-items: center;
+  font-size: 72px;
+}
+
+.photoActions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.photoActions button {
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  background: rgba(148, 163, 184, 0.12);
+  color: white;
+  border-radius: 14px;
+  padding: 14px;
+  font-weight: 900;
+  font-size: 15px;
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.infoGrid div {
+  background: rgba(2, 6, 23, 0.48);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 16px;
+  padding: 14px;
+}
+
+.infoGrid strong,
+.infoGrid span {
+  display: block;
+}
+
+.infoGrid span {
+  color: #94a3b8;
+  margin-top: 4px;
+  font-size: 13px;
+}
+.cameraBox {
+  overflow: hidden;
+  position: relative;
+}
+
+.previewImage {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 22px;
+}
+.cameraBox {
+  height: auto;
+  min-height: 240px;
+  overflow: hidden;
+  padding: 0;
+}
+
+.previewImage {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: none;
+  object-fit: contain;
+  border-radius: 22px;
+}
+.logPhoto {
+  width: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 14px;
+  background: #000;
+}
+
+.logPhoto img {
+  width: 100%;
+  height: auto;          /* 👈 THIS is the key */
+  object-fit: contain;
+  display: block;
+}
