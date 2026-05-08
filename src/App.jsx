@@ -1023,6 +1023,12 @@ function SwipeCatchCard({
             <strong>Bait:</strong> {fish.bait}
           </p>
 
+          {fish.patternTag && (
+            <p>
+              <strong>Fish Location:</strong> {fish.patternTag}
+            </p>
+          )}
+
           <div className="weatherMini">
             {hasValue(fish.weather?.temp) && (
               <div>
@@ -1073,15 +1079,82 @@ function SwipeCatchCard({
             )}
           </div>
 
-          {hasValue(fish.water?.summary?.waterTemp) && (
+          {fish.water?.summary && (
             <div className="waterMini">
-              <div>
-                <strong>Water Temp:</strong> {fish.water.summary.waterTemp}°F
-              </div>
-
-              {hasValue(fish.water?.summary?.waterTempSource) && (
+              {hasValue(fish.water.summary.station) && (
                 <div>
-                  <strong>Source:</strong> {fish.water.summary.waterTempSource}
+                  <strong>Station:</strong> {fish.water.summary.station}
+                </div>
+              )}
+
+              {hasValue(fish.water.summary.waterTemp) && (
+                <div>
+                  <strong>Water Temp:</strong> {fish.water.summary.waterTemp}°F
+                </div>
+              )}
+
+              {hasValue(fish.water.summary.waterTempSource) && (
+                <div>
+                  <strong>Water Source:</strong>{" "}
+                  {fish.water.summary.waterTempSource}
+                </div>
+              )}
+
+              {hasValue(fish.water.summary.flow) && (
+                <div>
+                  <strong>Flow:</strong> {fish.water.summary.flow} cfs
+                </div>
+              )}
+
+              {hasValue(fish.water.summary.gageHeight) && (
+                <div>
+                  <strong>Gage:</strong> {fish.water.summary.gageHeight} ft
+                </div>
+              )}
+
+              {hasValue(fish.water.summary.conductance) && (
+                <div>
+                  <strong>Conductance:</strong> {fish.water.summary.conductance}
+                </div>
+              )}
+
+              {hasValue(fish.water.summary.dissolvedOxygen) && (
+                <div>
+                  <strong>Dissolved Oxygen:</strong>{" "}
+                  {fish.water.summary.dissolvedOxygen}
+                </div>
+              )}
+
+              {hasValue(fish.water.summary.ph) && (
+                <div>
+                  <strong>pH:</strong> {fish.water.summary.ph}
+                </div>
+              )}
+
+              {hasValue(fish.water.summary.turbidity) && (
+                <div>
+                  <strong>Turbidity:</strong> {fish.water.summary.turbidity}
+                </div>
+              )}
+
+              {hasValue(fish.water.summary.precipitation) && (
+                <div>
+                  <strong>Water Rain:</strong>{" "}
+                  {fish.water.summary.precipitation}
+                </div>
+              )}
+
+              {hasValue(fish.water.summary.noaaWindSpeed) && (
+                <div>
+                  <strong>NOAA Wind:</strong> {fish.water.summary.noaaWindSpeed}{" "}
+                  mph
+                </div>
+              )}
+
+              {hasValue(fish.water.summary.noaaPressure) && (
+                <div>
+                  <strong>NOAA Pressure:</strong>{" "}
+                  {fish.water.summary.noaaPressure}
                 </div>
               )}
             </div>
