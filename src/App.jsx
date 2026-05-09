@@ -924,7 +924,15 @@ function SwipeCatchCard({
         onTouchEnd={handleTouchEnd}
       >
         <div className="logPhoto">
-          {fish.photo ? <img src={fish.photo} alt={fish.species} /> : "🐟"}
+          {fish.photo ? (
+            <img src={fish.photo} alt={fish.species} />
+          ) : (
+            <img
+              src={getFishIcon(fish.species)}
+              alt={fish.species}
+              className="compactFallbackIcon"
+            />
+          )}
         </div>
 
         <div className="logDetails">
@@ -1274,7 +1282,13 @@ function LogPage({
 
               <span>{fish.lake || "Unknown water"}</span>
 
-              <small>{formatCatchDate(fish.date)}</small>
+              <small>
+                {new Date(fish.date).toLocaleDateString(undefined, {
+                  month: "short",
+                  day: "numeric",
+                  year: "2-digit",
+                })}
+              </small>
 
               <div className="compactCatchMeta">
                 {fish.bait && <em>🎣 {fish.bait}</em>}

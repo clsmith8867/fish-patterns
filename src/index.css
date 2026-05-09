@@ -2489,3 +2489,9 @@ body {
   font-size: 12px;
   opacity: 0.85;
 }
+.compactFallbackIcon {
+  width: 74px;
+  height: 74px;
+  object-fit: contain;
+  opacity: 0.9;
+}
