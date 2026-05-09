@@ -1228,20 +1228,65 @@ function LogPage({
   setPage,
   setEditingCatchId,
 }) {
-  return (
-    <main className="screen">
-      <h1>Catch Log</h1>
+  const [selectedCatchId, setSelectedCatchId] = useState(null);
 
-      {catches.map((fish) => (
+  const selectedCatch =
+    catches.find((fish) => fish.id === selectedCatchId) || null;
+
+  if (selectedCatch) {
+    return (
+      <main className="screen">
+        <button
+          className="editCatchButton"
+          onClick={() => setSelectedCatchId(null)}
+        >
+          ← Back to Log
+        </button>
+
         <SwipeCatchCard
-          key={fish.id}
-          fish={fish}
+          fish={selectedCatch}
           onDeleteCatch={onDeleteCatch}
           onUpdateCatch={onUpdateCatch}
           setPage={setPage}
           setEditingCatchId={setEditingCatchId}
         />
-      ))}
+      </main>
+    );
+  }
+
+  return (
+    <main className="screen">
+      <h1>Catch Log</h1>
+
+      <section className="compactCatchGrid">
+        {catches.map((fish) => (
+          <button
+            key={fish.id}
+            className="compactCatchCard"
+            onClick={() => setSelectedCatchId(fish.id)}
+          >
+            <div className="compactCatchPhoto">
+              {fish.photo ? <img src={fish.photo} alt={fish.species} /> : "🐟"}
+            </div>
+
+            <div className="compactCatchBody">
+              <strong>{fish.species || "Unidentified Fish"}</strong>
+
+              <span>{fish.lake || "Unknown water"}</span>
+
+              <small>{formatCatchDate(fish.date)}</small>
+
+              <div className="compactCatchMeta">
+                {fish.bait && <em>🎣 {fish.bait}</em>}
+
+                {hasValue(fish.water?.summary?.waterTemp) && (
+                  <em>🌡️ {fish.water.summary.waterTemp}°F</em>
+                )}
+              </div>
+            </div>
+          </button>
+        ))}
+      </section>
     </main>
   );
 }
