@@ -41,6 +41,7 @@ import { Geolocation } from "@capacitor/geolocation";
 import { App as CapacitorApp } from "@capacitor/app";
 import splashImage from "./assets/bitelogic-splash.png";
 import splashVideo from "./assets/bitelogic-splash.mp4";
+import { Preferences } from "@capacitor/preferences";
 
 function getConditionClass(code) {
   if (code === 0) return "sunny";
@@ -928,7 +929,7 @@ function SwipeCatchCard({
             <img src={fish.photo} alt={fish.species} />
           ) : (
             <img
-              src={getFishIcon(fish.species)}
+              src={getFishIcon(fish.species || "")}
               alt={fish.species}
               className="compactFallbackIcon"
             />
@@ -1229,6 +1230,23 @@ function SwipeCatchCard({
   );
 }
 
+function getCatchMonthKey(dateValue) {
+  const d = new Date(dateValue);
+  if (Number.isNaN(d.getTime())) return null;
+
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function getMonthLabel(monthKey) {
+  const [year, month] = monthKey.split("-").map(Number);
+  const d = new Date(year, month - 1, 15, 12, 0, 0);
+
+  return d.toLocaleDateString(undefined, {
+    month: "long",
+    year: "numeric",
+  });
+}
+
 function LogPage({
   catches,
   onDeleteCatch,
@@ -1237,9 +1255,81 @@ function LogPage({
   setEditingCatchId,
 }) {
   const [selectedCatchId, setSelectedCatchId] = useState(null);
+  const [monthFilter, setMonthFilter] = useState("all");
+  const [waterFilter, setWaterFilter] = useState("all");
+  const [speciesFilter, setSpeciesFilter] = useState("all");
+  const [openMonths, setOpenMonths] = useState({});
+
+  function toggleMonth(month) {
+    setOpenMonths((current) => ({
+      ...current,
+      [month]: current[month] === false ? true : false,
+    }));
+  }
+
+  const safeCatches = Array.isArray(catches)
+    ? catches.filter((fish) => fish && typeof fish === "object")
+    : [];
+
+  const monthOptions = Array.from(
+    new Set(
+      safeCatches.map((fish) => getCatchMonthKey(fish?.date)).filter(Boolean),
+    ),
+  )
+    .sort()
+    .reverse();
+
+  const waterOptions = Array.from(
+    new Set(
+      safeCatches
+        .map((fish) => fish?.lake)
+        .filter(Boolean)
+        .filter(
+          (lake) => lake !== "Finding water..." && lake !== "Unknown water",
+        ),
+    ),
+  ).sort();
+
+  const speciesOptions = Array.from(
+    new Set(
+      safeCatches
+        .map((fish) => fish?.species)
+        .filter(Boolean)
+        .filter((species) => species !== "Unidentified Fish"),
+    ),
+  ).sort();
+
+  const filteredCatches = safeCatches
+    .filter((fish) => {
+      if (monthFilter !== "all") {
+        const key = getCatchMonthKey(fish?.date);
+        if (key !== monthFilter) return false;
+      }
+
+      if (waterFilter !== "all" && fish?.lake !== waterFilter) return false;
+      if (speciesFilter !== "all" && fish?.species !== speciesFilter)
+        return false;
+
+      return true;
+    })
+    .sort((a, b) => {
+      const aTime = new Date(a?.date).getTime() || 0;
+      const bTime = new Date(b?.date).getTime() || 0;
+      return bTime - aTime;
+    });
+
+  const groupedCatches = filteredCatches.reduce((groups, fish) => {
+    const monthKey = getCatchMonthKey(fish?.date) || "unknown";
+    const label = monthKey === "unknown" ? "No Date" : getMonthLabel(monthKey);
+
+    if (!groups[label]) groups[label] = [];
+    groups[label].push(fish);
+
+    return groups;
+  }, {});
 
   const selectedCatch =
-    catches.find((fish) => fish.id === selectedCatchId) || null;
+    safeCatches.find((fish) => fish?.id === selectedCatchId) || null;
 
   if (selectedCatch) {
     return (
@@ -1266,47 +1356,103 @@ function LogPage({
     <main className="screen">
       <h1>Catch Log</h1>
 
-      <section className="compactCatchGrid">
-        {catches.map((fish) => (
-          <button
-            key={fish.id}
-            className="compactCatchCard"
-            onClick={() => setSelectedCatchId(fish.id)}
-          >
-            <div className="compactCatchPhoto">
-              {fish.photo ? <img src={fish.photo} alt={fish.species} /> : "🐟"}
-            </div>
+      <section className="logFilters">
+        <select
+          value={monthFilter}
+          onChange={(e) => setMonthFilter(e.target.value)}
+        >
+          <option value="all">All Months</option>
+          {monthOptions.map((monthKey) => (
+            <option key={monthKey} value={monthKey}>
+              {getMonthLabel(monthKey)}
+            </option>
+          ))}
+        </select>
 
-            <div className="compactCatchBody">
-              <strong>{fish.species || "Unidentified Fish"}</strong>
+        <select
+          value={speciesFilter}
+          onChange={(e) => setSpeciesFilter(e.target.value)}
+        >
+          <option value="all">All Species</option>
+          {speciesOptions.map((species) => (
+            <option key={species} value={species}>
+              {species}
+            </option>
+          ))}
+        </select>
 
-              <span>{fish.lake || "Unknown water"}</span>
-
-              <small>
-                {new Date(fish.date).toLocaleDateString(undefined, {
-                  month: "short",
-                  day: "numeric",
-                  year: "2-digit",
-                })}
-              </small>
-
-              <div className="compactCatchMeta">
-                {fish.bait && <em>🎣 {fish.bait}</em>}
-
-                {hasValue(fish.water?.summary?.waterTemp) && (
-                  <em>🌡️ {fish.water.summary.waterTemp}°F</em>
-                )}
-              </div>
-            </div>
-          </button>
-        ))}
+        <select
+          value={waterFilter}
+          onChange={(e) => setWaterFilter(e.target.value)}
+        >
+          <option value="all">All Waters</option>
+          {waterOptions.map((lake) => (
+            <option key={lake} value={lake}>
+              {lake}
+            </option>
+          ))}
+        </select>
       </section>
+
+      <p className="logCount">{filteredCatches.length} catch(es)</p>
+
+      <div className="groupedCatchSections">
+        {Object.entries(groupedCatches).map(([month, monthCatches]) => (
+          <section key={month} className="monthGroup">
+            <button className="monthHeader" onClick={() => toggleMonth(month)}>
+              <strong>{month}</strong>
+              <span>
+                {monthCatches.length} •{" "}
+                {openMonths[month] === false ? "Show" : "Hide"}
+              </span>
+            </button>
+
+            {openMonths[month] !== false && (
+              <div className="compactCatchGrid">
+                {monthCatches.map((fish, index) => (
+                  <button
+                    key={fish?.id || index}
+                    className="compactCatchCard"
+                    onClick={() => setSelectedCatchId(fish.id)}
+                  >
+                    <div className="compactCatchPhoto">
+                      {fish.photo ? (
+                        <img src={fish.photo} alt={fish.species || "Fish"} />
+                      ) : (
+                        <img
+                          src={getFishIcon(fish.species || "")}
+                          alt={fish.species || "Fish"}
+                          className="compactFallbackIcon"
+                        />
+                      )}
+                    </div>
+
+                    <div className="compactCatchBody">
+                      <strong>{fish?.species || "Unidentified Fish"}</strong>
+                      <span>{fish?.lake || "Unknown water"}</span>
+                      <small>
+                        {fish?.date
+                          ? new Date(fish.date).toLocaleDateString(undefined, {
+                              month: "short",
+                              day: "numeric",
+                              year: "2-digit",
+                            })
+                          : "No date"}
+                      </small>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </section>
+        ))}
+      </div>
     </main>
   );
 }
 
 function getFishIcon(species = "") {
-  const name = species.toLowerCase();
+  const name = String(species || "").toLowerCase();
 
   const icons = [
     // 🔥 BASS (split)
@@ -2804,15 +2950,58 @@ export default function App() {
   const [editingCatchId, setEditingCatchId] = useState(null);
   const [predictionLocation, setPredictionLocation] = useState(null);
 
-  const [catches, setCatches] = useState(() => {
-    try {
-      const saved = localStorage.getItem("fish-patterns-catches");
-      return saved ? JSON.parse(saved) : starterCatches;
-    } catch {
-      localStorage.removeItem("fish-patterns-catches");
-      return starterCatches;
+  const [catches, setCatches] = useState([]);
+  const [catchesLoaded, setCatchesLoaded] = useState(false);
+
+  useEffect(() => {
+    async function loadCatches() {
+      try {
+        const nativeSaved = await Preferences.get({
+          key: "fish-patterns-catches",
+        });
+
+        if (nativeSaved.value) {
+          setCatches(JSON.parse(nativeSaved.value));
+          setCatchesLoaded(true);
+          return;
+        }
+
+        const browserSaved = localStorage.getItem("fish-patterns-catches");
+
+        if (browserSaved) {
+          const parsed = JSON.parse(browserSaved);
+          setCatches(parsed);
+
+          await Preferences.set({
+            key: "fish-patterns-catches",
+            value: JSON.stringify(parsed),
+          });
+        }
+      } catch (error) {
+        console.error("Failed to load catches:", error);
+        setCatches([]);
+      }
+
+      setCatchesLoaded(true);
     }
-  });
+
+    loadCatches();
+  }, []);
+
+  useEffect(() => {
+    if (!catchesLoaded) return;
+
+    const json = JSON.stringify(catches);
+
+    localStorage.setItem("fish-patterns-catches", json);
+
+    Preferences.set({
+      key: "fish-patterns-catches",
+      value: json,
+    }).catch((error) => {
+      console.error("Failed to save catches:", error);
+    });
+  }, [catches, catchesLoaded]);
 
   useEffect(() => {
     if (didUpgradeRef.current) return;
@@ -3067,6 +3256,14 @@ export default function App() {
           getCurrentWeather={getCurrentWeather}
           getRecentWeatherAverages={getRecentWeatherAverages}
         />
+      );
+    }
+
+    if (!catchesLoaded) {
+      return (
+        <main className="screen">
+          <h1>Loading catches...</h1>
+        </main>
       );
     }
 
