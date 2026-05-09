@@ -3160,33 +3160,17 @@ export default function App() {
     upgradeAndSave();
   }, []);
 
-  async function saveCatch(newCatch) {
-    let catchWithHydro = newCatch;
-
-    try {
-      const hydro =
-        newCatch.hydro?.sourceUsed === "Manual entry"
-          ? newCatch.hydro
-          : await getHydroDataForCatch(newCatch);
-
-      catchWithHydro = {
-        ...newCatch,
-        hydro,
-      };
-    } catch (error) {
-      console.error("Hydro lookup failed:", error);
-    }
-
+  function saveCatch(newCatch) {
     setCatches((current) => {
-      const exists = current.some((fish) => fish.id === catchWithHydro.id);
+      const exists = current.some((fish) => fish.id === newCatch.id);
 
       if (exists) {
         return current.map((fish) =>
-          fish.id === catchWithHydro.id ? { ...fish, ...catchWithHydro } : fish,
+          fish.id === newCatch.id ? { ...fish, ...newCatch } : fish,
         );
       }
 
-      return [catchWithHydro, ...current];
+      return [newCatch, ...current];
     });
 
     setPage("log");
