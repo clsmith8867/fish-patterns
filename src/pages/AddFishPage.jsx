@@ -37,6 +37,7 @@ export default function AddFishPage({
   const [aiResult, setAiResult] = useState(null);
   const [finalSpecies, setFinalSpecies] = useState("");
   const finalSpeciesRef = useRef("");
+  const confirmedSpeciesRef = useRef("");
   const [gps, setGps] = useState(null);
   const [gpsStatus, setGpsStatus] = useState("Waiting");
   const [showLocationPicker, setShowLocationPicker] = useState(false);
@@ -310,6 +311,7 @@ export default function AddFishPage({
       id: Date.now(),
       isLoadingConditions: true,
       species:
+        cleanSpeciesName(confirmedSpeciesRef.current) ||
         cleanSpeciesName(finalSpeciesRef.current) ||
         cleanSpeciesName(corrected) ||
         cleanSpeciesName(form.species) ||
@@ -519,6 +521,7 @@ export default function AddFishPage({
               setCorrectedFishIdName(cleanName);
               setFinalSpecies(cleanName);
               finalSpeciesRef.current = cleanName;
+              confirmedSpeciesRef.current = cleanName;
 
               setForm((current) => ({
                 ...current,
