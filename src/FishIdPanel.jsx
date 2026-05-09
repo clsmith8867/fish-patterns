@@ -5,7 +5,7 @@ export default function FishIdPanel({
   rawResults = [],
   imageId,
   correctedSpeciesName = "",
-  onSpeciesConfirmed
+  onSpeciesConfirmed,
 }) {
   const [confirmedSpecies, setConfirmedSpecies] = useState("");
   const [saved, setSaved] = useState(false);
@@ -20,8 +20,8 @@ export default function FishIdPanel({
           name: correctedSpeciesName,
           confidence: 99,
           traits: ["This photo was previously corrected by you."],
-          lookalikes: []
-        }
+          lookalikes: [],
+        },
       ];
     }
 
@@ -30,7 +30,7 @@ export default function FishIdPanel({
       name: result.label,
       confidence: Math.round((result.score || 0) * 100),
       traits: [result.reason || "Backend AI guess"],
-      lookalikes: []
+      lookalikes: [],
     }));
   }, [rawResults, correctedSpeciesName]);
 
@@ -39,32 +39,33 @@ export default function FishIdPanel({
   if (!topGuess) return null;
 
   function confirmSpecies(speciesName) {
-  alert("FishIdPanel confirmed: " + speciesName);
+    if (!speciesName) return;
 
-  if (!speciesName) return;
+    setConfirmedSpecies(speciesName);
+    setSaved(true);
 
-  setConfirmedSpecies(speciesName);
-  setSaved(true);
+    onSpeciesConfirmed?.(speciesName);
 
-  onSpeciesConfirmed?.(speciesName);
-
-  if (imageId) {
-    saveFishIdCorrection({
-      imageId,
-      guessedSpeciesKey: topGuess.name,
-      confirmedSpeciesKey: speciesName
-    });
+    if (imageId) {
+      saveFishIdCorrection({
+        imageId,
+        guessedSpeciesKey: topGuess.name,
+        confirmedSpeciesKey: speciesName,
+      });
+    }
   }
-}
+
   return (
     <div className="fish-id-card">
       <div className="fish-id-header">
         <div>
           <p className="eyebrow">Smart Fish ID</p>
-          <h2>{topGuess.name}</h2>
+          <h2>{confirmedSpecies || topGuess.name}</h2>
         </div>
 
-        <div className="confidence-badge">{topGuess.confidence}%</div>
+        <div className="confidence-badge">
+          {confirmedSpecies ? "99" : topGuess.confidence}%
+        </div>
       </div>
 
       <div className="guess-list">
@@ -85,21 +86,17 @@ export default function FishIdPanel({
         </ul>
       </div>
 
-      <div className="trait-box">
-        <h3>Common mix-ups</h3>
-        <p>{topGuess.lookalikes.join(", ")}</p>
-      </div>
-
       <div className="confirm-area">
-        <button onClick={() => confirmSpecies(topGuess.name)}>
-          Correct
+        <button type="button" onClick={() => confirmSpecies(topGuess.name)}>
+          Use This Species
         </button>
 
         <select
           value={confirmedSpecies}
           onChange={(e) => {
-            setConfirmedSpecies(e.target.value);
-            setSaved(false);
+            const picked = e.target.value;
+            if (!picked) return;
+            confirmSpecies(picked);
           }}
         >
           <option value="">Wrong? Pick species</option>
@@ -109,13 +106,6 @@ export default function FishIdPanel({
             </option>
           ))}
         </select>
-
-        <button
-          disabled={!confirmedSpecies}
-          onClick={() => confirmSpecies(confirmedSpecies)}
-        >
-          Save Correction
-        </button>
       </div>
 
       {saved && (

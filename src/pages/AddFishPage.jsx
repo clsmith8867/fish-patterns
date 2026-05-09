@@ -318,6 +318,14 @@ export default function AddFishPage({
         cleanSpeciesName(aiResult?.species) ||
         cleanSpeciesName(fishIdResults?.[0]?.label) ||
         "Unidentified Fish",
+      debugSpecies: {
+        confirmedSpeciesRef: confirmedSpeciesRef.current,
+        finalSpeciesRef: finalSpeciesRef.current,
+        corrected,
+        formSpecies: form.species,
+        aiSpecies: aiResult?.species,
+        topGuess: fishIdResults?.[0]?.label,
+      },
       scientificName: detectedFish?.scientificName || "",
       aiSource: detectedFish?.source || "",
       size: form.weight || form.length || "No size",
