@@ -5,6 +5,7 @@ import FishIdPanel from "../FishIdPanel";
 import LurePicker from "../LurePicker";
 import { identifyFish } from "../utils/fishIdApi";
 import { estimateWaterTempFromWeather } from "../utils/fishing";
+import { getHydroDataForCatch } from "../hydroData";
 
 export default function AddFishPage({
   onSaveCatch,
@@ -374,6 +375,7 @@ export default function AddFishPage({
       let weather = null;
       let water = null;
       let managedWater = null;
+      let hydro = manualHydro;
 
       // 🔥 Waterbody lookup FIRST (this is your key fix)
       try {
@@ -453,12 +455,32 @@ export default function AddFishPage({
         console.log("Managed water failed", e);
       }
 
+      try {
+        hydro =
+          manualHydro ||
+          (await getHydroDataForCatch({
+            ...newCatch,
+            lake: finalLake,
+            waterbodyName: finalLake,
+            managedWater,
+            managedBy: managedWater?.provider,
+            gps: {
+              latitude: saveGps.latitude,
+              longitude: saveGps.longitude,
+            },
+            date: catchDate,
+          }));
+      } catch (e) {
+        console.log("Hydro failed", e);
+      }
+
       onSaveCatch({
         ...newCatch,
         lake: finalLake,
         weather,
         water,
         managedWater,
+        hydro,
         isLoadingConditions: false,
       });
     } catch (e) {
