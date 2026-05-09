@@ -1228,20 +1228,215 @@ function LogPage({
   setPage,
   setEditingCatchId,
 }) {
-  return (
-    <main className="screen">
-      <h1>Catch Log</h1>
+  const [timeFilter, setTimeFilter] = useState("all");
+  const [waterFilter, setWaterFilter] = useState("all");
+  const [speciesFilter, setSpeciesFilter] = useState("all");
+  const [viewMode, setViewMode] = useState("compact");
+  const [selectedCatchId, setSelectedCatchId] = useState(null);
 
-      {catches.map((fish) => (
+  const monthOptions = useMemo(() => {
+    const options = new Map();
+
+    catches.forEach((fish) => {
+      if (!fish.date) return;
+
+      const d = new Date(fish.date);
+      if (Number.isNaN(d.getTime())) return;
+
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      const label = d.toLocaleDateString(undefined, {
+        month: "long",
+        year: "numeric",
+      });
+
+      options.set(key, label);
+    });
+
+    return Array.from(options.entries()).sort((a, b) =>
+      b[0].localeCompare(a[0]),
+    );
+  }, [catches]);
+
+  const waterOptions = useMemo(() => {
+    return Array.from(
+      new Set(
+        catches
+          .map((fish) => fish.lake)
+          .filter(Boolean)
+          .filter(
+            (lake) => lake !== "Finding water..." && lake !== "Unknown water",
+          ),
+      ),
+    ).sort();
+  }, [catches]);
+
+  const speciesOptions = useMemo(() => {
+    return Array.from(
+      new Set(catches.map((fish) => fish.species).filter(Boolean)),
+    ).sort();
+  }, [catches]);
+
+  const filteredCatches = useMemo(() => {
+    return catches
+      .filter((fish) => {
+        if (timeFilter !== "all") {
+          const d = new Date(fish.date);
+          const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+          if (key !== timeFilter) return false;
+        }
+
+        if (waterFilter !== "all" && fish.lake !== waterFilter) return false;
+        if (speciesFilter !== "all" && fish.species !== speciesFilter)
+          return false;
+
+        return true;
+      })
+      .sort((a, b) => new Date(b.date) - new Date(a.date));
+  }, [catches, timeFilter, waterFilter, speciesFilter]);
+
+  const selectedCatch = filteredCatches.find(
+    (fish) => fish.id === selectedCatchId,
+  );
+
+  if (selectedCatch && viewMode === "compact") {
+    return (
+      <main className="screen">
+        <button
+          className="editCatchButton"
+          onClick={() => setSelectedCatchId(null)}
+        >
+          ← Back to Log
+        </button>
+
         <SwipeCatchCard
-          key={fish.id}
-          fish={fish}
+          fish={selectedCatch}
           onDeleteCatch={onDeleteCatch}
           onUpdateCatch={onUpdateCatch}
           setPage={setPage}
           setEditingCatchId={setEditingCatchId}
         />
-      ))}
+      </main>
+    );
+  }
+
+  return (
+    <main className="screen">
+      <h1>Catch Log</h1>
+
+      <section className="panel logFilterPanel">
+        <div className="logFilterGrid">
+          <label>
+            <span>Month / Year</span>
+            <select
+              value={timeFilter}
+              onChange={(e) => setTimeFilter(e.target.value)}
+            >
+              <option value="all">All Time</option>
+              {monthOptions.map(([key, label]) => (
+                <option key={key} value={key}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label>
+            <span>Water</span>
+            <select
+              value={waterFilter}
+              onChange={(e) => setWaterFilter(e.target.value)}
+            >
+              <option value="all">All Waters</option>
+              {waterOptions.map((lake) => (
+                <option key={lake} value={lake}>
+                  {lake}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label>
+            <span>Species</span>
+            <select
+              value={speciesFilter}
+              onChange={(e) => setSpeciesFilter(e.target.value)}
+            >
+              <option value="all">All Species</option>
+              {speciesOptions.map((species) => (
+                <option key={species} value={species}>
+                  {species}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+
+        <div className="logFilterFooter">
+          <strong>{filteredCatches.length} catch(es)</strong>
+
+          <button
+            type="button"
+            onClick={() =>
+              setViewMode(viewMode === "compact" ? "detail" : "compact")
+            }
+          >
+            {viewMode === "compact" ? "Detail View" : "Compact View"}
+          </button>
+        </div>
+      </section>
+
+      {filteredCatches.length === 0 && (
+        <section className="panel">
+          <p>No catches match those filters.</p>
+        </section>
+      )}
+
+      {viewMode === "detail" ? (
+        filteredCatches.map((fish) => (
+          <SwipeCatchCard
+            key={fish.id}
+            fish={fish}
+            onDeleteCatch={onDeleteCatch}
+            onUpdateCatch={onUpdateCatch}
+            setPage={setPage}
+            setEditingCatchId={setEditingCatchId}
+          />
+        ))
+      ) : (
+        <section className="compactCatchGrid">
+          {filteredCatches.map((fish) => (
+            <button
+              key={fish.id}
+              className="compactCatchCard"
+              onClick={() => setSelectedCatchId(fish.id)}
+            >
+              <div className="compactCatchPhoto">
+                {fish.photo ? (
+                  <img src={fish.photo} alt={fish.species} />
+                ) : (
+                  "🐟"
+                )}
+              </div>
+
+              <div className="compactCatchBody">
+                <strong>{fish.species || "Unidentified Fish"}</strong>
+                <span>{fish.lake || "Unknown water"}</span>
+                <small>{formatCatchDate(fish.date)}</small>
+
+                <div className="compactCatchMeta">
+                  {fish.bait && <em>🎣 {fish.bait}</em>}
+                  {hasValue(fish.water?.summary?.waterTemp) && (
+                    <em>🌡️ {fish.water.summary.waterTemp}°F</em>
+                  )}
+                  {hasValue(fish.hydro?.turbineRelease) && (
+                    <em>🌊 {fish.hydro.turbineRelease} cfs</em>
+                  )}
+                </div>
+              </div>
+            </button>
+          ))}
+        </section>
+      )}
     </main>
   );
 }
