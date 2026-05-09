@@ -512,13 +512,35 @@ export default function AddFishPage({
             rawResults={fishIdResults}
             correctedSpeciesName={correctedFishIdName}
             onSpeciesConfirmed={(speciesName) => {
-              alert("App received correction: " + speciesName);
+              const cleanName = cleanSpeciesName(speciesName);
 
-              setCorrectedFishIdName(speciesName);
-              setFinalSpecies(speciesName);
-              finalSpeciesRef.current = speciesName;
-              update("species", speciesName);
-              saveCorrection(photoKey, speciesName);
+              if (!cleanName) return;
+
+              setCorrectedFishIdName(cleanName);
+              setFinalSpecies(cleanName);
+              finalSpeciesRef.current = cleanName;
+
+              setForm((current) => ({
+                ...current,
+                species: cleanName,
+              }));
+
+              setAiResult((current) => ({
+                ...(current || {}),
+                species: cleanName,
+                confidence: 99,
+              }));
+
+              setFishIdResults([
+                {
+                  label: cleanName,
+                  score: 0.99,
+                },
+              ]);
+
+              if (photoKey) {
+                saveCorrection(photoKey, cleanName);
+              }
 
               saveTrainingExample(
                 {
@@ -527,7 +549,7 @@ export default function AddFishPage({
                   lake: manualLake,
                   gps,
                 },
-                speciesName,
+                cleanName,
               );
             }}
           />
