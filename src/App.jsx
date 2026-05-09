@@ -1234,10 +1234,16 @@ function LogPage({
   const [viewMode, setViewMode] = useState("compact");
   const [selectedCatchId, setSelectedCatchId] = useState(null);
 
+  const safeCatches = useMemo(() => {
+    return Array.isArray(catches)
+      ? catches.filter((fish) => fish && typeof fish === "object")
+      : [];
+  }, [catches]);
+
   const monthOptions = useMemo(() => {
     const options = new Map();
 
-    catches.forEach((fish) => {
+    safeCatches.forEach((fish) => {
       if (!fish.date) return;
 
       const d = new Date(fish.date);
@@ -1255,12 +1261,12 @@ function LogPage({
     return Array.from(options.entries()).sort((a, b) =>
       b[0].localeCompare(a[0]),
     );
-  }, [catches]);
+  }, [safeCatches]);
 
   const waterOptions = useMemo(() => {
     return Array.from(
       new Set(
-        catches
+        safeCatches
           .map((fish) => fish.lake)
           .filter(Boolean)
           .filter(
@@ -1268,35 +1274,43 @@ function LogPage({
           ),
       ),
     ).sort();
-  }, [catches]);
+  }, [safeCatches]);
 
   const speciesOptions = useMemo(() => {
     return Array.from(
-      new Set(catches.map((fish) => fish.species).filter(Boolean)),
+      new Set(safeCatches.map((fish) => fish.species).filter(Boolean)),
     ).sort();
-  }, [catches]);
+  }, [safeCatches]);
 
   const filteredCatches = useMemo(() => {
-    return catches
+    return safeCatches
       .filter((fish) => {
         if (timeFilter !== "all") {
           const d = new Date(fish.date);
+          if (Number.isNaN(d.getTime())) return false;
+
           const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
           if (key !== timeFilter) return false;
         }
 
         if (waterFilter !== "all" && fish.lake !== waterFilter) return false;
-        if (speciesFilter !== "all" && fish.species !== speciesFilter)
+        if (speciesFilter !== "all" && fish.species !== speciesFilter) {
           return false;
+        }
 
         return true;
       })
-      .sort((a, b) => new Date(b.date) - new Date(a.date));
-  }, [catches, timeFilter, waterFilter, speciesFilter]);
+      .sort((a, b) => {
+        const aTime = new Date(a.date).getTime() || 0;
+        const bTime = new Date(b.date).getTime() || 0;
+        return bTime - aTime;
+      });
+  }, [safeCatches, timeFilter, waterFilter, speciesFilter]);
 
-  const selectedCatch = filteredCatches.find(
-    (fish) => fish.id === selectedCatchId,
-  );
+  const selectedCatch =
+    selectedCatchId != null
+      ? filteredCatches.find((fish) => fish.id === selectedCatchId)
+      : null;
 
   if (selectedCatch && viewMode === "compact") {
     return (
@@ -1412,7 +1426,7 @@ function LogPage({
             >
               <div className="compactCatchPhoto">
                 {fish.photo ? (
-                  <img src={fish.photo} alt={fish.species} />
+                  <img src={fish.photo} alt={fish.species || "Fish"} />
                 ) : (
                   "🐟"
                 )}
