@@ -42,6 +42,7 @@ import { App as CapacitorApp } from "@capacitor/app";
 import splashImage from "./assets/bitelogic-splash.png";
 import splashVideo from "./assets/bitelogic-splash.mp4";
 import { Preferences } from "@capacitor/preferences";
+import { getCoastalWaterData, getTideData } from "./utils/coastalWaterApi";
 
 function getConditionClass(code) {
   if (code === 0) return "sunny";
@@ -140,7 +141,7 @@ function formatCatchDate(dateValue) {
   return date.toLocaleString();
 }
 
-function fileToCompressedDataUrl(file, maxWidth = 1200, quality = 0.72) {
+function fileToCompressedDataUrl(file, maxWidth = 900, quality = 0.58) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
 
@@ -2067,6 +2068,8 @@ function MapPage({
       let water = null;
       let managedWater = null;
       let hydro = null;
+      let coastal = null;
+      let tide = null;
 
       try {
         weather = await getWeather(lat, lon, now);
@@ -2082,8 +2085,64 @@ function MapPage({
         console.log("Water Check water failed", e);
       }
 
+      try {
+        coastal = await getCoastalWaterData(lat, lon);
+
+        if (coastal?.found) {
+          water = {
+            ...(water || {}),
+            coastal,
+            summary: {
+              ...(water?.summary || {}),
+              station: water?.summary?.station || coastal.summary.station,
+              waterTemp: water?.summary?.waterTemp ?? coastal.summary.waterTemp,
+              waterTempSource:
+                water?.summary?.waterTempSource ||
+                coastal.summary.waterTempSource,
+              noaaWindSpeed: coastal.summary.wind,
+              noaaPressure: coastal.summary.pressure,
+              waveHeightFt: coastal.summary.waveHeightFt,
+              wavePeriodSec: coastal.summary.wavePeriodSec,
+            },
+          };
+        }
+      } catch (e) {
+        console.log("Coastal water failed", e);
+      }
+
+      try {
+        tide = await getTideData(lat, lon);
+
+        if (tide?.found) {
+          water = {
+            ...(water || {}),
+            tide,
+            summary: {
+              ...(water?.summary || {}),
+              tideStation: tide.summary.station,
+              tideDirection: tide.summary.tideDirection,
+            },
+          };
+        }
+      } catch (e) {
+        console.log("Tide data failed", e);
+      }
+
       const estimatedWaterTemp = estimateWaterTempFromWeather(weather);
-      const usgsStation = await getWaterCheckUsgsStation(lat, lon, lake);
+
+      const hasMarineData =
+        coastal?.found ||
+        hasValue(water?.summary?.noaaWindSpeed) ||
+        hasValue(water?.summary?.waveHeightFt) ||
+        hasValue(water?.summary?.wavePeriodSec) ||
+        String(water?.summary?.waterTempSource || "")
+          .toLowerCase()
+          .includes("noaa");
+
+      const usgsStation = hasMarineData
+        ? null
+        : await getWaterCheckUsgsStation(lat, lon, lake);
+
       if (requestId !== waterCheckRequestRef.current) return;
 
       if (!water) {
@@ -2135,6 +2194,19 @@ function MapPage({
         console.log("Water Check managed water failed", e);
       }
 
+      if (hasMarineData) {
+        managedWater = {
+          provider: "NOAA / Coastal Marine Data",
+          providerId: "noaa_marine",
+          system: "Marine / Coastal system",
+          note: `Nearest marine station: ${
+            coastal?.summary?.station ||
+            water?.summary?.station ||
+            "NOAA station"
+          }`,
+        };
+      }
+
       try {
         hydro = await getHydroDataForCatch({
           lake,
@@ -2154,13 +2226,18 @@ function MapPage({
       if (requestId !== waterCheckRequestRef.current) return;
 
       setWaterCheck({
-        lake,
+        lake:
+          hasMarineData && lake === "Unknown water"
+            ? "Coastal / Marine Water"
+            : lake,
         lat,
         lon,
         weather,
         water,
         managedWater,
         hydro,
+        coastal,
+        tide,
       });
     } catch (error) {
       console.log("Water check failed", error);
@@ -2514,7 +2591,8 @@ function MapPage({
                   {waterCheck.managedWater?.provider && (
                     <p>
                       <strong>Managed By:</strong>{" "}
-                      {waterCheck.managedWater.provider}
+                      {waterCheck.managedWater?.provider ||
+                        "Unknown / Public Water"}
                     </p>
                   )}
 
@@ -2567,7 +2645,9 @@ function MapPage({
 
                   {hasValue(waterCheck.water?.summary?.station) && (
                     <p>
-                      <strong>USGS:</strong> {waterCheck.water.summary.station}
+                      <strong>Station:</strong>{" "}
+                      {waterCheck.coastal?.summary?.station ||
+                        waterCheck.water.summary.station}
                     </p>
                   )}
                   {hasValue(waterCheck.water?.summary?.distance) && (
@@ -2588,6 +2668,50 @@ function MapPage({
                     </p>
                   )}
 
+                  {hasValue(waterCheck.water?.summary?.waveHeightFt) && (
+                    <p>🌊 Waves: {waterCheck.water.summary.waveHeightFt} ft</p>
+                  )}
+
+                  {hasValue(waterCheck.water?.summary?.wavePeriodSec) && (
+                    <p>
+                      ⏱️ Wave Period: {waterCheck.water.summary.wavePeriodSec}s
+                    </p>
+                  )}
+
+                  {hasValue(waterCheck.water?.summary?.noaaWindSpeed) && (
+                    <p>
+                      💨 Marine Wind: {waterCheck.water.summary.noaaWindSpeed}{" "}
+                      mph
+                    </p>
+                  )}
+
+                  {hasValue(waterCheck.water?.summary?.waveHeightFt) && (
+                    <p>🌊 Waves: {waterCheck.water.summary.waveHeightFt} ft</p>
+                  )}
+
+                  {hasValue(waterCheck.water?.summary?.wavePeriodSec) && (
+                    <p>
+                      ⏱️ Wave Period: {waterCheck.water.summary.wavePeriodSec}s
+                    </p>
+                  )}
+
+                  {hasValue(waterCheck.water?.summary?.noaaPressure) && (
+                    <p>
+                      📊 Pressure: {waterCheck.water.summary.noaaPressure} hPa
+                    </p>
+                  )}
+
+                  {hasValue(waterCheck.water?.summary?.tideDirection) && (
+                    <p>🌗 Tide: {waterCheck.water.summary.tideDirection}</p>
+                  )}
+
+                  {hasValue(waterCheck.water?.summary?.tideStation) && (
+                    <p>
+                      <strong>Tide Station:</strong>{" "}
+                      {waterCheck.water.summary.tideStation}
+                    </p>
+                  )}
+
                   {Array.isArray(waterCheck.hydro?.releaseSchedule) &&
                     waterCheck.hydro.releaseSchedule.length > 0 && (
                       <p>
@@ -2597,6 +2721,23 @@ function MapPage({
                           .join(" • ")}
                       </p>
                     )}
+
+                  {waterCheck.coastal?.raw?.rawText && (
+                    <pre
+                      style={{
+                        fontSize: 10,
+                        maxHeight: 120,
+                        overflow: "auto",
+                        whiteSpace: "pre-wrap",
+                        background: "#111827",
+                        color: "#e5e7eb",
+                        padding: 8,
+                        borderRadius: 8,
+                      }}
+                    >
+                      {waterCheck.coastal.raw.rawText}
+                    </pre>
+                  )}
 
                   {waterCheck.error && <p>{waterCheck.error}</p>}
                 </div>
