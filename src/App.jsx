@@ -39,7 +39,7 @@ import { getPatternStrength } from "./utils/patterns";
 import { getHydroDataForCatch } from "./hydroData";
 import { Geolocation } from "@capacitor/geolocation";
 import { App as CapacitorApp } from "@capacitor/app";
-import splashImage from "./assets/bitelogic-splash.png";
+import splashImage from "./assets/bitelogic-app-icon.png";
 import splashVideo from "./assets/bitelogic-splash.mp4";
 import { Preferences } from "@capacitor/preferences";
 import { getCoastalWaterData, getTideData } from "./utils/coastalWaterApi";
@@ -2071,22 +2071,34 @@ function MapPage({
       let coastal = null;
       let tide = null;
 
-      try {
-        weather = await getWeather(lat, lon, now);
-        if (requestId !== waterCheckRequestRef.current) return;
-      } catch (e) {
-        console.log("Water Check weather failed", e);
+      const isLikelyCoastal = lat < 31.2 || lon < -86 || lon > -82;
+
+      const [weatherResult, waterResult, coastalResult, tideResult] =
+        await Promise.allSettled([
+          getWeather(lat, lon, now),
+          getAllWaterData(lat, lon, lake),
+          isLikelyCoastal
+            ? getCoastalWaterData(lat, lon)
+            : Promise.resolve(null),
+          isLikelyCoastal ? getTideData(lat, lon) : Promise.resolve(null),
+        ]);
+
+      if (requestId !== waterCheckRequestRef.current) return;
+
+      if (weatherResult.status === "fulfilled") {
+        weather = weatherResult.value;
+      } else {
+        console.log("Water Check weather failed", weatherResult.reason);
       }
 
-      try {
-        water = await getAllWaterData(lat, lon, lake);
-        if (requestId !== waterCheckRequestRef.current) return;
-      } catch (e) {
-        console.log("Water Check water failed", e);
+      if (waterResult.status === "fulfilled") {
+        water = waterResult.value;
+      } else {
+        console.log("Water Check water failed", waterResult.reason);
       }
 
-      try {
-        coastal = await getCoastalWaterData(lat, lon);
+      if (coastalResult.status === "fulfilled") {
+        coastal = coastalResult.value;
 
         if (coastal?.found) {
           water = {
@@ -2103,13 +2115,33 @@ function MapPage({
               noaaPressure: coastal.summary.pressure,
               waveHeightFt: coastal.summary.waveHeightFt,
               wavePeriodSec: coastal.summary.wavePeriodSec,
+              buoyDistanceMiles: coastal.summary.buoyDistanceMiles,
+              buoyDirection: coastal.summary.buoyDirection,
+              waveSourceLabel: coastal.summary.waveSourceLabel,
             },
           };
         }
-      } catch (e) {
-        console.log("Coastal water failed", e);
+      } else {
+        console.log("Coastal water failed", coastalResult.reason);
       }
 
+      if (tideResult.status === "fulfilled") {
+        tide = tideResult.value;
+
+        if (tide?.found) {
+          water = {
+            ...(water || {}),
+            tide,
+            summary: {
+              ...(water?.summary || {}),
+              tideStation: tide.summary.station,
+              tideDirection: tide.summary.tideDirection,
+            },
+          };
+        }
+      } else {
+        console.log("Tide data failed", tideResult.reason);
+      }
       try {
         tide = await getTideData(lat, lon);
 
@@ -2650,6 +2682,15 @@ function MapPage({
                         waterCheck.water.summary.station}
                     </p>
                   )}
+
+                  {hasValue(waterCheck.water?.summary?.buoyDistanceMiles) && (
+                    <p>
+                      <strong>Buoy:</strong>{" "}
+                      {waterCheck.water.summary.buoyDistanceMiles} mi{" "}
+                      {waterCheck.water.summary.buoyDirection}
+                    </p>
+                  )}
+
                   {hasValue(waterCheck.water?.summary?.distance) && (
                     <p>
                       📍 Nearest Station:{" "}
@@ -2669,7 +2710,10 @@ function MapPage({
                   )}
 
                   {hasValue(waterCheck.water?.summary?.waveHeightFt) && (
-                    <p>🌊 Waves: {waterCheck.water.summary.waveHeightFt} ft</p>
+                    <p>
+                      🌊 {waterCheck.water.summary.waveSourceLabel || "Waves"}:{" "}
+                      {waterCheck.water.summary.waveHeightFt} ft
+                    </p>
                   )}
 
                   {hasValue(waterCheck.water?.summary?.wavePeriodSec) && (
@@ -2682,16 +2726,6 @@ function MapPage({
                     <p>
                       💨 Marine Wind: {waterCheck.water.summary.noaaWindSpeed}{" "}
                       mph
-                    </p>
-                  )}
-
-                  {hasValue(waterCheck.water?.summary?.waveHeightFt) && (
-                    <p>🌊 Waves: {waterCheck.water.summary.waveHeightFt} ft</p>
-                  )}
-
-                  {hasValue(waterCheck.water?.summary?.wavePeriodSec) && (
-                    <p>
-                      ⏱️ Wave Period: {waterCheck.water.summary.wavePeriodSec}s
                     </p>
                   )}
 
@@ -2721,23 +2755,6 @@ function MapPage({
                           .join(" • ")}
                       </p>
                     )}
-
-                  {waterCheck.coastal?.raw?.rawText && (
-                    <pre
-                      style={{
-                        fontSize: 10,
-                        maxHeight: 120,
-                        overflow: "auto",
-                        whiteSpace: "pre-wrap",
-                        background: "#111827",
-                        color: "#e5e7eb",
-                        padding: 8,
-                        borderRadius: 8,
-                      }}
-                    >
-                      {waterCheck.coastal.raw.rawText}
-                    </pre>
-                  )}
 
                   {waterCheck.error && <p>{waterCheck.error}</p>}
                 </div>
@@ -3422,7 +3439,7 @@ export default function App() {
           />
 
           <div className="biteSplashContent">
-            <div className="biteLogo">BiteLogic</div>
+            <img src={splashImage} alt="BiteLogic" className="biteSplashIcon" />
 
             <div className="biteTagline">Stop guessing. Find patterns.</div>
 

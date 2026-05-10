@@ -11,6 +11,25 @@ function milesBetween(lat1, lon1, lat2, lon2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+function bearingToCardinal(deg) {
+  const dirs = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+  return dirs[Math.round(deg / 45) % 8];
+}
+
+function bearingBetween(lat1, lon1, lat2, lon2) {
+  const phi1 = (lat1 * Math.PI) / 180;
+  const phi2 = (lat2 * Math.PI) / 180;
+  const lonA = (lon1 * Math.PI) / 180;
+  const lonB = (lon2 * Math.PI) / 180;
+
+  const y = Math.sin(lonB - lonA) * Math.cos(phi2);
+  const x =
+    Math.cos(phi1) * Math.sin(phi2) -
+    Math.sin(phi1) * Math.cos(phi2) * Math.cos(lonB - lonA);
+
+  return ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360;
+}
+
 function cToF(c) {
   const n = Number(c);
   if (!Number.isFinite(n)) return null;
@@ -75,8 +94,7 @@ async function loadNdbcStations() {
     return cachedNdbcStations;
   }
 
-  const url =
-    "https://www.ndbc.noaa.gov/activestations.xml";
+  const url = "http://localhost:3001/api/noaa/ndbc-stations";
 
   const res = await fetch(url);
 
@@ -122,32 +140,34 @@ async function nearestNdbcStation(lat, lon, maxMiles = 180) {
   const ranked = stations
     .map((station) => ({
       ...station,
-      distanceMiles: milesBetween(
-        lat,
-        lon,
-        station.lat,
-        station.lon,
-      ),
+      distanceMiles: milesBetween(lat, lon, station.lat, station.lon),
     }))
     .filter((s) => s.distanceMiles <= maxMiles)
     .sort((a, b) => a.distanceMiles - b.distanceMiles);
 
-  for (const station of ranked.slice(0, 15)) {
+  let nearestWorkingStation = null;
+
+  for (const station of ranked.slice(0, 25)) {
     try {
-      const url =
-        `https://www.ndbc.noaa.gov/data/realtime2/${station.id}.txt`;
-
+      const url = `http://localhost:3001/api/noaa/ndbc/${station.id}`;
       const text = await fetchText(url);
+      const parsed = parseNdbcLatest(text);
 
-      if (stationSupportsWaveData(text)) {
+      if (!parsed) continue;
+
+      if (!nearestWorkingStation) {
+        nearestWorkingStation = station;
+      }
+
+      if (parsed.waveHeightFt != null || parsed.dominantWavePeriodSec != null) {
         return station;
       }
-    } catch (err) {
-      console.log("Wave capability check failed", station.id);
+    } catch {
+      // skip stations with no realtime file
     }
   }
 
-  return ranked[0] || null;
+  return nearestWorkingStation;
 }
 
 function nearestCoopsTideStation(lat, lon, maxMiles = 90) {
@@ -158,6 +178,7 @@ function nearestCoopsTideStation(lat, lon, maxMiles = 90) {
 
   return ranked[0]?.distanceMiles <= maxMiles ? ranked[0] : null;
 }
+
 
 function formatNoaaDate(date) {
   const y = date.getFullYear();
@@ -197,14 +218,17 @@ export async function getCoastalWaterData(lat, lon) {
     };
   }
 
-  const url = `https://www.ndbc.noaa.gov/data/realtime2/${station.id}.txt`;
+  const url = `http://localhost:3001/api/noaa/ndbc/${station.id}`;
   const text = await fetchText(url);
   const latest = parseNdbcLatest(text);
 
-  latest.rawText = text.slice(0, 500);
+  
  
   console.log("NDBC TEXT", text);
 console.log("PARSED NDBC", latest);
+
+console.log("WVHT RAW:", latest?.waveHeightFt);
+console.log("DPD RAW:", latest?.dominantWavePeriodSec);
 
   if (!latest) {
     return {
@@ -215,6 +239,8 @@ console.log("PARSED NDBC", latest);
     };
   }
 
+  latest.rawText = text.slice(0, 500);
+
   return {
     found: true,
     source: "NOAA NDBC",
@@ -223,6 +249,11 @@ console.log("PARSED NDBC", latest);
       station: station.name,
       stationId: station.id,
       distanceMiles: Math.round(station.distanceMiles * 10) / 10,
+      buoyDistanceMiles: Math.round(station.distanceMiles),
+buoyDirection: bearingToCardinal(
+  bearingBetween(lat, lon, station.lat, station.lon),
+),
+waveSourceLabel: station.distanceMiles <= 50 ? "Waves" : "Offshore Waves",
       waterTemp: latest.waterTempF,
       waterTempSource: "NOAA NDBC buoy",
       wind: latest.windMph,
