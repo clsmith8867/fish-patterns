@@ -787,6 +787,55 @@ app.get("/api/hydro/lakelevels", async (req, res) => {
   }
 });
 
+app.get("/api/noaa/ndbc-stations", async (req, res) => {
+  try {
+    const response = await fetch("https://www.ndbc.noaa.gov/activestations.xml", {
+      headers: {
+        "User-Agent": "Mozilla/5.0",
+        Accept: "application/xml,text/xml,*/*",
+      },
+    });
+
+    const text = await response.text();
+
+    res.set("Access-Control-Allow-Origin", "*");
+    res.set("Content-Type", "application/xml");
+    res.status(response.status).send(text);
+  } catch (error) {
+    console.error("NDBC station fetch failed:", error);
+    res.status(500).json({ error: "Failed to fetch NOAA stations" });
+  }
+});
+
+app.get("/api/noaa/ndbc/:stationId", async (req, res) => {
+  try {
+    const stationId = String(req.params.stationId || "").replace(/[^A-Za-z0-9]/g, "");
+
+    if (!stationId) {
+      return res.status(400).json({ error: "Missing station ID" });
+    }
+
+    const response = await fetch(
+      `https://www.ndbc.noaa.gov/data/realtime2/${stationId}.txt`,
+      {
+        headers: {
+          "User-Agent": "Mozilla/5.0",
+          Accept: "text/plain,*/*",
+        },
+      },
+    );
+
+    const text = await response.text();
+
+    res.set("Access-Control-Allow-Origin", "*");
+    res.set("Content-Type", "text/plain");
+    res.status(response.status).send(text);
+  } catch (error) {
+    console.error("NDBC realtime fetch failed:", error);
+    res.status(500).json({ error: "Failed to fetch NOAA realtime data" });
+  }
+});
+
 app.listen(3001, () => {
   console.log("Fish ID server running on http://localhost:3001");
 });
